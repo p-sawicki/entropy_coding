@@ -1,0 +1,6 @@
+[submodule "googletest"]
+	path = googletest
+	url = https://github.com/google/googletest.git
+[submodule "VVCSoftware_VTM"]
+	path = VVCSoftware_VTM
+	url = https://vcgit.hhi.fraunhofer.de/jvet/VVCSoftware_VTM.git

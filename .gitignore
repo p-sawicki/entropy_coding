@@ -1,0 +1,7 @@
+.vscode
+build
+lib
+bin
+log*.txt
+rec.yuv
+str.bin
