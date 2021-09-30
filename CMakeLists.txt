@@ -17,6 +17,8 @@ include_directories(
   src
 )
 
+add_library(LogLib src/log.cpp)
+
 add_subdirectory(googletest)
 add_subdirectory(VVCSoftware_VTM)
 
