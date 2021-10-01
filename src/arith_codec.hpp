@@ -195,10 +195,10 @@ public:
   ~BitEstimatorBase() = default;
 
 public:
-  void init(OutputBitstream *bitstream) = 0;
-  void uninit() = 0;
+  void init(OutputBitstream *bitstream);
+  void uninit();
   void start();
-  void finish() = 0;
+  void finish();
   void restart();
   void reset(int qp, int initId);
 
@@ -228,8 +228,10 @@ template <class BinProbModel> class TBitEstimator : public BitEstimatorBase {
 public:
   TBitEstimator();
   ~TBitEstimator() = default;
+
   void encodeBin(unsigned bin, unsigned ctxId);
   void encodeBinTrm(unsigned bin);
+  void setBinStorage(bool b);
   const BinStore *getBinStore() const;
   BinEncIf *getTestBinEncoder() const;
 

@@ -628,7 +628,13 @@ BitEstimatorBase::BitEstimatorBase(const BinProbModel *dummy)
   m_EstFracBits = 0;
 }
 
+void BitEstimatorBase::init(OutputBitstream *bitstream) {}
+
+void BitEstimatorBase::uninit() {}
+
 void BitEstimatorBase::start() { m_EstFracBits = 0; }
+
+void BitEstimatorBase::finish() {}
 
 void BitEstimatorBase::restart() {
   m_EstFracBits = (m_EstFracBits >> SCALE_BITS) << SCALE_BITS;
@@ -712,6 +718,9 @@ template <class BinProbModel>
 void TBitEstimator<BinProbModel>::encodeBinTrm(unsigned bin) {
   m_EstFracBits += BinProbModel::estFracBitsTrm(bin);
 }
+
+template <class BinProbModel>
+void TBitEstimator<BinProbModel>::setBinStorage(bool b) {}
 
 template <class BinProbModel>
 const BinStore *TBitEstimator<BinProbModel>::getBinStore() const {

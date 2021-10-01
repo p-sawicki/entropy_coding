@@ -41,6 +41,7 @@
 #include "arith_codec.hpp"
 #include "bit_stream.hpp"
 #include "contexts.hpp"
+#include "data_types.h"
 
 //! \ingroup EncoderLib
 //! \{
