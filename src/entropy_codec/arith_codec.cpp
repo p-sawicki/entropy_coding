@@ -107,11 +107,19 @@ void BinDecoderBase::reset(int qp, int initId) {
   start();
 }
 
-#if JVET_V0106_RRC_RICE
-void BinDecoderBase::riceStatReset(int bitDepth) {
-  Ctx::riceStatReset(bitDepth);
-}
+#if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
+void BinDecoderBase::riceStatReset(int bitDepth,
+                                   bool persistentRiceAdaptationEnabledFlag)
+#else
+void BinDecoderBase::riceStatReset(int bitDepth)
 #endif
+{
+#if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
+  Ctx::riceStatReset(bitDepth, persistentRiceAdaptationEnabledFlag);
+#else
+  Ctx::riceStatReset(bitDepth);
+#endif
+}
 
 #if RExt__DECODER_DEBUG_BIT_STATISTICS
 void BinDecoderBase::set(const CodingStatisticsClassType &type) {

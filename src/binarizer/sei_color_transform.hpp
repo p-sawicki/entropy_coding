@@ -31,24 +31,43 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef COMMON_DEF_HPP
-#define COMMON_DEF_HPP
+/** \file     SEIColourTransform.h
+    \brief    Colour transform SEI
+*/
 
-#include "type_def.hpp"
+#ifndef __SEIFILMCOLOURTRANFORMAPPLY__
+#define __SEIFILMCOLOURTRANFORMAPPLY__
 
-static constexpr int SCALE_BITS = 15; // Precision for fractional bit estimates
-static const int MAX_QP = 63;
+#include <vector>
 
-#if JVET_V0106_RRC_RICE
-static const int RExt__GOLOMB_RICE_ADAPTATION_STATISTICS_SETS =
-    MAX_NUM_COMPONENT;
-#else
-static const int RExt__GOLOMB_RICE_ADAPTATION_STATISTICS_SETS = 4;
+#include "common_def.hpp"
+//! \ingroup CommonLib
+//! \{
+
+struct PelStorage;
+class SEIColourTransformInfo;
+
+class SEIColourTransformApply {
+private:
+  uint32_t m_width;
+  uint32_t m_height;
+  ChromaFormat m_chromaFormat;
+  uint8_t m_bitDepth;
+  uint32_t m_lutSize;
+  std::vector<Pel> m_mapLut[MAX_NUM_COMPONENT];
+
+public:
+  SEIColourTransformInfo *m_pColourTransfParams;
+
+public:
+  SEIColourTransformApply();
+  virtual ~SEIColourTransformApply();
+
+  void create(uint32_t width, uint32_t height, ChromaFormat fmt,
+              uint8_t bitDepth);
+  void inverseColourTransform(PelStorage *transformBuf);
+  void generateColourTransfLUTs();
+
+}; // END CLASS DEFINITION SEIColourTransformApply
+
 #endif
-
-template <typename T>
-inline T Clip3(const T minVal, const T maxVal, const T a) {
-  return std::min<T>(std::max<T>(minVal, a), maxVal);
-} ///< general min/max clip
-
-#endif // COMMON_DEF_HPP

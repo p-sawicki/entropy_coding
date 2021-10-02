@@ -273,7 +273,9 @@ public:
 
   void init(int qp, int initId);
 
-#if JVET_V0106_RRC_RICE
+#if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
+  void riceStatReset(int bitDepth, bool persistentRiceAdaptationEnabledFlag);
+#else
   void riceStatReset(int bitDepth);
 #endif
 
@@ -286,10 +288,8 @@ public:
   const unsigned &getGRAdaptStats(unsigned id) const;
   unsigned &getGRAdaptStats(unsigned id);
 
-#if JVET_V0106_RRC_RICE
   const unsigned getBaseLevel() const;
   void setBaseLevel(int value);
-#endif
 
 public:
   unsigned getBPMType() const;

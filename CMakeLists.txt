@@ -14,16 +14,19 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN_DIR})
 
 include_directories(
   googletest/googletest/include
-  src
+  src/binarizer
+  src/common
+  src/entropy_codec
+  src/log
 )
 
-add_library(LogLib src/log.cpp)
+add_library(LogLib src/log/log.cpp)
 
 add_subdirectory(googletest)
 add_subdirectory(VVCSoftware_VTM)
 
 add_library(EntropyCoderLib
-  src/arith_codec.cpp
-  src/bit_stream.cpp
-  src/contexts.cpp
+  src/entropy_codec/arith_codec.cpp
+  src/common/bit_stream.cpp
+  src/common/contexts.cpp
 )

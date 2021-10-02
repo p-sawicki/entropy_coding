@@ -1163,14 +1163,26 @@ void Ctx::init(int qp, int initId) {
   }
 }
 
-#if JVET_V0106_RRC_RICE
-void Ctx::riceStatReset(int bitDepth) {
+#if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
+void Ctx::riceStatReset(int bitDepth, bool persistentRiceAdaptationEnabledFlag)
+#else
+void Ctx::riceStatReset(int bitDepth)
+#endif
+{
   for (std::size_t k = 0; k < RExt__GOLOMB_RICE_ADAPTATION_STATISTICS_SETS;
        k++) {
+#if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
+    if (persistentRiceAdaptationEnabledFlag) {
+      CHECK(bitDepth <= 10, "BitDepth shall be larger than 10.");
+      m_GRAdaptStats[k] = 2 * floorLog2(bitDepth - 10);
+    } else {
+      m_GRAdaptStats[k] = 0;
+    }
+#else
     m_GRAdaptStats[k] = (bitDepth > 10) ? 2 * floorLog2(bitDepth - 10) : 0;
+#endif
   }
 }
-#endif
 
 void Ctx::loadPStates(const std::vector<uint16_t> &probStates) {
   switch (m_BPMType) {

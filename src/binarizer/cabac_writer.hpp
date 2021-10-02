@@ -40,8 +40,10 @@
 
 #include "arith_codec.hpp"
 #include "bit_stream.hpp"
-#include "contexts.hpp"
-#include "data_types.h"
+#include "coding_structure.hpp"
+#include "context_modelling.hpp"
+#include "slice.hpp"
+#include "unit_partitioner.hpp"
 
 //! \ingroup EncoderLib
 //! \{
