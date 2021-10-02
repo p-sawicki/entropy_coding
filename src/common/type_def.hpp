@@ -36,6 +36,7 @@
 
 #include <sstream>
 #include <stdexcept>
+#include <vector>
 
 enum ComponentID {
   COMPONENT_Y = 0,
