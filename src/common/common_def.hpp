@@ -476,6 +476,18 @@ static const int MIN_TSRC_RICE = 1; ///< Minimum supported TSRC Rice parameter
 static const int MAX_CTI_LUT_SIZE =
     64; ///< Maximum colour transform LUT size for CTI SEI
 
+    static const int    MAX_BT_DEPTH  =                                 4;      ///<  <=7
+                                                                            //for P/B slice CTU config. para.
+static const int    MAX_BT_DEPTH_INTER =                            4;      ///< <=7
+                                                                            //for I slice chroma CTB configuration para. (in luma samples)
+static const int    MAX_BT_DEPTH_C      =                           0;      ///< <=7
+static const int    MIN_DUALTREE_CHROMA_WIDTH  =                    4;
+static const int    MIN_DUALTREE_CHROMA_SIZE   =                   16;
+static const SplitSeries SPLIT_BITS         =                       5;
+static const SplitSeries SPLIT_DMULT        =                       5;
+static const SplitSeries SPLIT_MASK         =                      31;      ///< = (1 << SPLIT_BITS) - 1
+
+
 template <typename T>
 inline T Clip3(const T minVal, const T maxVal, const T a) {
   return std::min<T>(std::max<T>(minVal, a), maxVal);
@@ -758,5 +770,25 @@ protected:
   std::vector<SizeType> m_sizeToIdxTab;
   std::vector<SizeType> m_idxToSizeTab;
 };
+
+inline size_t rsAddr(const Position &pos, const uint32_t stride, const UnitScale &unitScale )
+{
+  return (size_t)(stride >> unitScale.posx) * (size_t)(pos.y >> unitScale.posy) + (size_t)(pos.x >> unitScale.posx);
+}
+
+inline size_t rsAddr(const Position &pos, const Position &origin, const uint32_t stride, const UnitScale &unitScale )
+{
+  return (stride >> unitScale.posx) * ((pos.y - origin.y) >> unitScale.posy) + ((pos.x - origin.x) >> unitScale.posx);
+}
+
+inline size_t rsAddr(const Position &pos, const uint32_t stride )
+{
+  return stride * (size_t)pos.y + (size_t)pos.x;
+}
+
+inline size_t rsAddr(const Position &pos, const Position &origin, const uint32_t stride )
+{
+  return stride * (pos.y - origin.y) + (pos.x - origin.x);
+}
 
 #endif // COMMON_DEF_HPP

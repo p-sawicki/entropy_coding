@@ -65,111 +65,38 @@ private:
   static const MvPrecision m_amvrPrecAffine[3];
   static const MvPrecision m_amvrPrecIbc[3];
 
-  static const int mvClipPeriod = (1 << MV_BITS);
-  static const int halfMvClipPeriod = (1 << (MV_BITS - 1));
-
-public:
+ public:
   int hor; ///< horizontal component of motion vector
   int ver; ///< vertical component of motion vector
 
-  // ------------------------------------------------------------------------------------------------------------------
-  // constructors
-  // ------------------------------------------------------------------------------------------------------------------
+//   // ------------------------------------------------------------------------------------------------------------------
+//   // constructors
+//   // ------------------------------------------------------------------------------------------------------------------
 
   Mv() : hor(0), ver(0) {}
   Mv(int iHor, int iVer) : hor(iHor), ver(iVer) {}
 
-  // ------------------------------------------------------------------------------------------------------------------
-  // set
-  // ------------------------------------------------------------------------------------------------------------------
+//   // ------------------------------------------------------------------------------------------------------------------
+//   // set
+//   // ------------------------------------------------------------------------------------------------------------------
 
   void set(int iHor, int iVer) {
     hor = iHor;
     ver = iVer;
   }
-  void setHor(int i) { hor = i; }
-  void setVer(int i) { ver = i; }
   void setZero() { hor = ver = 0; }
 
-  // ------------------------------------------------------------------------------------------------------------------
-  // get
-  // ------------------------------------------------------------------------------------------------------------------
+//   // ------------------------------------------------------------------------------------------------------------------
+//   // get
+//   // ------------------------------------------------------------------------------------------------------------------
 
   int getHor() const { return hor; }
   int getVer() const { return ver; }
-  int getAbsHor() const { return abs(hor); }
-  int getAbsVer() const { return abs(ver); }
-
-  // ------------------------------------------------------------------------------------------------------------------
-  // operations
-  // ------------------------------------------------------------------------------------------------------------------
-
-  const Mv &operator+=(const Mv &_rcMv) {
-    {
-      Mv rcMv = _rcMv;
-
-      hor += rcMv.hor;
-      ver += rcMv.ver;
-    }
-    return *this;
-  }
-
-  const Mv &operator-=(const Mv &_rcMv) {
-    {
-      Mv rcMv = _rcMv;
-
-      hor -= rcMv.hor;
-      ver -= rcMv.ver;
-    }
-    return *this;
-  }
-
-  //! shift right with rounding
-  void divideByPowerOf2(const int i) {
-    if (i != 0) {
-      const int offset = (1 << (i - 1));
-      hor = (hor + offset - (hor >= 0)) >> i;
-      ver = (ver + offset - (ver >= 0)) >> i;
-    }
-  }
 
   const Mv &operator<<=(const int i) {
     hor <<= i;
     ver <<= i;
     return *this;
-  }
-
-  const Mv &operator>>=(const int i) {
-    if (i != 0) {
-      const int offset = (1 << (i - 1));
-      hor = (hor + offset - (hor >= 0)) >> i;
-      ver = (ver + offset - (ver >= 0)) >> i;
-    }
-    return *this;
-  }
-
-  const Mv operator-(const Mv &rcMv) const {
-    return Mv(hor - rcMv.hor, ver - rcMv.ver);
-  }
-
-  const Mv operator+(const Mv &rcMv) const {
-    return Mv(hor + rcMv.hor, ver + rcMv.ver);
-  }
-
-  bool operator==(const Mv &rcMv) const {
-    return (hor == rcMv.hor && ver == rcMv.ver);
-  }
-
-  bool operator!=(const Mv &rcMv) const { return !(*this == rcMv); }
-
-  const Mv scaleMv(int iScale) const {
-    const int mvx =
-        Clip3(MV_MIN, MV_MAX,
-              (iScale * getHor() + 128 - (iScale * getHor() >= 0)) >> 8);
-    const int mvy =
-        Clip3(MV_MIN, MV_MAX,
-              (iScale * getVer() + 128 - (iScale * getVer() >= 0)) >> 8);
-    return Mv(mvx, mvy);
   }
 
   void changePrecision(const MvPrecision &src, const MvPrecision &dst) {
@@ -186,22 +113,9 @@ public:
     }
   }
 
-  void roundToPrecision(const MvPrecision &src, const MvPrecision &dst) {
-    changePrecision(src, dst);
-    changePrecision(dst, src);
-  }
-
   // translational MV
   void changeTransPrecInternal2Amvr(const int amvr) {
     changePrecision(MV_PRECISION_INTERNAL, m_amvrPrecision[amvr]);
-  }
-
-  void changeTransPrecAmvr2Internal(const int amvr) {
-    changePrecision(m_amvrPrecision[amvr], MV_PRECISION_INTERNAL);
-  }
-
-  void roundTransPrecInternal2Amvr(const int amvr) {
-    roundToPrecision(MV_PRECISION_INTERNAL, m_amvrPrecision[amvr]);
   }
 
   // affine MV
@@ -209,66 +123,10 @@ public:
     changePrecision(MV_PRECISION_INTERNAL, m_amvrPrecAffine[amvr]);
   }
 
-  void changeAffinePrecAmvr2Internal(const int amvr) {
-    changePrecision(m_amvrPrecAffine[amvr], MV_PRECISION_INTERNAL);
-  }
-
-  void roundAffinePrecInternal2Amvr(const int amvr) {
-    roundToPrecision(MV_PRECISION_INTERNAL, m_amvrPrecAffine[amvr]);
-  }
-
   // IBC block vector
   void changeIbcPrecInternal2Amvr(const int amvr) {
     changePrecision(MV_PRECISION_INTERNAL, m_amvrPrecIbc[amvr]);
   }
-
-  void changeIbcPrecAmvr2Internal(const int amvr) {
-    changePrecision(m_amvrPrecIbc[amvr], MV_PRECISION_INTERNAL);
-  }
-
-  void roundIbcPrecInternal2Amvr(const int amvr) {
-    roundToPrecision(MV_PRECISION_INTERNAL, m_amvrPrecIbc[amvr]);
-  }
-
-  Mv getSymmvdMv(const Mv &curMvPred, const Mv &tarMvPred) {
-    return Mv(tarMvPred.hor - hor + curMvPred.hor,
-              tarMvPred.ver - ver + curMvPred.ver);
-  }
-
-  void clipToStorageBitDepth() {
-    hor = Clip3(-(1 << 17), (1 << 17) - 1, hor);
-    ver = Clip3(-(1 << 17), (1 << 17) - 1, ver);
-  }
-  void mvCliptoStorageBitDepth() // periodic clipping
-  {
-    hor = (hor + mvClipPeriod) & (mvClipPeriod - 1);
-    hor = (hor >= halfMvClipPeriod) ? (hor - mvClipPeriod) : hor;
-    ver = (ver + mvClipPeriod) & (mvClipPeriod - 1);
-    ver = (ver >= halfMvClipPeriod) ? (ver - mvClipPeriod) : ver;
-  }
 }; // END CLASS DEFINITION MV
-
-namespace std {
-template <> struct hash<Mv> : public unary_function<Mv, uint64_t> {
-  uint64_t operator()(const Mv &value) const {
-    return (((uint64_t)value.hor << 32) + value.ver);
-  }
-};
-}; // namespace std
-extern void (*clipMv)(Mv &rcMv, const struct Position &pos,
-                      const struct Size &size, const class SPS &sps,
-                      const class PPS &pps);
-void clipMvInPic(Mv &rcMv, const struct Position &pos, const struct Size &size,
-                 const class SPS &sps, const class PPS &pps);
-void clipMvInSubpic(Mv &rcMv, const struct Position &pos,
-                    const struct Size &size, const class SPS &sps,
-                    const class PPS &pps);
-
-bool wrapClipMv(Mv &rcMv, const Position &pos, const struct Size &size,
-                const SPS *sps, const PPS *pps);
-
-void roundAffineMv(int &mvx, int &mvy, int nShift);
-
-//! \}
 
 #endif // __MV__

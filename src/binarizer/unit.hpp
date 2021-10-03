@@ -341,14 +341,11 @@ struct CodingUnit : public UnitArea {
   bool rootCbf;
   uint8_t sbtInfo;
   uint32_t tileIdx;
-  uint8_t mtsFlag;
   uint32_t lfnstIdx;
   uint8_t BcwIdx;
-  int refIdxBi[2];
   bool mipFlag;
 
-  // needed for fast imv mode decisions
-  int8_t imvNumCand;
+  // // needed for fast imv mode decisions
   uint8_t smvdMode;
   uint8_t ispMode;
   bool useEscape[MAX_NUM_CHANNEL_TYPE];
@@ -358,12 +355,6 @@ struct CodingUnit : public UnitArea {
   uint8_t reusePLTSize[MAX_NUM_CHANNEL_TYPE];
   uint8_t curPLTSize[MAX_NUM_CHANNEL_TYPE];
   Pel curPLT[MAX_NUM_COMPONENT][MAXPLTSIZE];
-
-  CodingUnit() : chType(CH_L) {}
-  CodingUnit(const UnitArea &unit);
-  CodingUnit(const ChromaFormat _chromaFormat, const Area &area);
-
-  CodingUnit &operator=(const CodingUnit &other);
 
   void initData();
 
@@ -419,35 +410,12 @@ struct InterPredictionData {
   uint32_t mmvdMergeIdx;
   uint8_t interDir;
   uint8_t mvpIdx[NUM_REF_PIC_LIST_01];
-  uint8_t mvpNum[NUM_REF_PIC_LIST_01];
   Mv mvd[NUM_REF_PIC_LIST_01];
   Mv mv[NUM_REF_PIC_LIST_01];
-#if GDR_ENABLED
-  bool mvSolid[NUM_REF_PIC_LIST_01];
-  bool mvValid[NUM_REF_PIC_LIST_01];
-  bool mvpSolid[NUM_REF_PIC_LIST_01];
-  MvpType mvpType[NUM_REF_PIC_LIST_01];
-  Position mvpPos[NUM_REF_PIC_LIST_01];
-#endif
   int16_t refIdx[NUM_REF_PIC_LIST_01];
   MergeType mergeType;
-  bool mvRefine;
-  Mv mvdL0SubPu[MAX_NUM_SUBCU_DMVR];
   Mv mvdAffi[NUM_REF_PIC_LIST_01][3];
-  Mv mvAffi[NUM_REF_PIC_LIST_01][3];
-#if GDR_ENABLED
-  bool mvAffiSolid[NUM_REF_PIC_LIST_01][3];
-  bool mvAffiValid[NUM_REF_PIC_LIST_01][3];
-  MvpType mvAffiType[NUM_REF_PIC_LIST_01][3];
-  Position mvAffiPos[NUM_REF_PIC_LIST_01][3];
-#endif
   bool ciipFlag;
-
-  Mv bv;                  // block vector for IBC
-  Mv bvd;                 // block vector difference for IBC
-  uint8_t mmvdEncOptMode; // 0: no action 1: skip chroma MC for MMVD candidate
-                          // pre-selection 2: skip chroma MC and BIO for MMVD
-                          // candidate pre-selection
 };
 
 struct PredictionUnit : public UnitArea,
@@ -457,28 +425,9 @@ struct PredictionUnit : public UnitArea,
   CodingStructure *cs;
   ChannelType chType;
 
-  // constructors
-  PredictionUnit() : chType(CH_L) {}
-  PredictionUnit(const UnitArea &unit);
-  PredictionUnit(const ChromaFormat _chromaFormat, const Area &area);
-
   void initData();
-
-  PredictionUnit &operator=(const IntraPredictionData &predData);
-  PredictionUnit &operator=(const InterPredictionData &predData);
-  PredictionUnit &operator=(const PredictionUnit &other);
-  PredictionUnit &operator=(const MotionInfo &mi);
-
   unsigned idx;
-
   PredictionUnit *next;
-
-  // for accessing motion information, which can have higher resolution than PUs
-  // (should always be used, when accessing neighboring motion information)
-  const MotionInfo &getMotionInfo() const;
-  const MotionInfo &getMotionInfo(const Position &pos) const;
-  MotionBuf getMotionBuf();
-  CMotionBuf getMotionBuf() const;
 };
 
 // ---------------------------------------------------------------------------
@@ -489,17 +438,12 @@ struct TransformUnit : public UnitArea {
   CodingUnit *cu;
   CodingStructure *cs;
   ChannelType chType;
-  int m_chromaResScaleInv;
 
   uint8_t depth;
   uint8_t mtsIdx[MAX_NUM_TBLOCKS];
   bool noResidual;
   uint8_t jointCbCr;
   uint8_t cbf[MAX_NUM_TBLOCKS];
-
-  TransformUnit() : chType(CH_L) {}
-  TransformUnit(const UnitArea &unit);
-  TransformUnit(const ChromaFormat _chromaFormat, const Area &area);
 
   void initData();
 
@@ -508,8 +452,6 @@ struct TransformUnit : public UnitArea {
   TransformUnit *prev;
   void init(TCoeff **coeffs, Pel **pcmbuf, bool **runType);
 
-  TransformUnit &operator=(const TransformUnit &other);
-  void copyComponentFrom(const TransformUnit &other, const ComponentID compID);
   void checkTuNoResidual(unsigned idx);
   int getTbAreaAfterCoefZeroOut(ComponentID compID) const;
 
@@ -517,16 +459,12 @@ struct TransformUnit : public UnitArea {
   const CCoeffBuf getCoeffs(const ComponentID id) const;
   PelBuf getPcmbuf(const ComponentID id);
   const CPelBuf getPcmbuf(const ComponentID id) const;
-  int getChromaAdj() const;
-  void setChromaAdj(int i);
   PelBuf getcurPLTIdx(const ComponentID id);
   const CPelBuf getcurPLTIdx(const ComponentID id) const;
   PLTtypeBuf getrunType(const ComponentID id);
   const CPLTtypeBuf getrunType(const ComponentID id) const;
   PLTescapeBuf getescapeValue(const ComponentID id);
   const CPLTescapeBuf getescapeValue(const ComponentID id) const;
-  Pel *getPLTIndex(const ComponentID id);
-  bool *getRunTypes(const ComponentID id);
 
 private:
   TCoeff *m_coeffs[MAX_NUM_TBLOCKS];

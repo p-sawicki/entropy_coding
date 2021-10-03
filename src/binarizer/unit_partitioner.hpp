@@ -147,11 +147,8 @@ public:
                              const CodingStructure &cs) = 0;
   virtual void exitCurrSplit() = 0;
   virtual bool nextPart(const CodingStructure &cs, bool autoPop = false) = 0;
-  virtual bool hasNextPart() = 0;
 
   virtual void setCUData(CodingUnit &cu);
-
-  virtual void copyState(const Partitioner &other);
 
 public:
   virtual void canSplit(const CodingStructure &cs, bool &canNo, bool &canQt,
@@ -161,25 +158,17 @@ public:
                                const CodingStructure &cs) = 0;
   virtual PartSplit getImplicitSplit(const CodingStructure &cs) = 0;
   bool isSepTree(const CodingStructure &cs);
-  bool isLocalSepTree(const CodingStructure &cs);
   bool isConsInter() { return modeType == MODE_TYPE_INTER; }
   bool isConsIntra() { return modeType == MODE_TYPE_INTRA; }
 };
 
-class AdaptiveDepthPartitioner : public Partitioner {
-public:
-  void setMaxMinDepth(unsigned &minDepth, unsigned &maxDepth,
-                      const CodingStructure &cs) const;
-};
-
-class QTBTPartitioner : public AdaptiveDepthPartitioner {
+class QTBTPartitioner : public Partitioner {
 public:
   void initCtu(const UnitArea &ctuArea, const ChannelType _chType,
                const Slice &slice);
   void splitCurrArea(const PartSplit split, const CodingStructure &cs);
   void exitCurrSplit();
   bool nextPart(const CodingStructure &cs, bool autoPop = false);
-  bool hasNextPart();
 
   void canSplit(const CodingStructure &cs, bool &canNo, bool &canQt,
                 bool &canBh, bool &canBv, bool &canTh, bool &canTv);
@@ -212,7 +201,6 @@ public:
   void splitCurrArea(const PartSplit split, const CodingStructure &cs);
   void exitCurrSplit();
   bool nextPart(const CodingStructure &cs, bool autoPop = false);
-  bool hasNextPart();
   void canSplit(const CodingStructure &cs, bool &canNo, bool &canQt,
                 bool &canBh, bool &canBv, bool &canTh, bool &canTv){};
   bool canSplit(const PartSplit split, const CodingStructure &cs);
