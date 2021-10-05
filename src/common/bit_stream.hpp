@@ -1,43 +1,13 @@
-/* The copyright in this software is being made available under the BSD
- * License, included below. This software may be subject to other third party
- * and contributor rights, including patent rights, and no such rights are
- * granted under this license.
- *
- * Copyright (c) 2010-2021, ITU/ISO/IEC
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  * Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- *  * Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *  * Neither the name of the ITU/ISO/IEC nor the names of its contributors may
- *    be used to endorse or promote products derived from this software without
- *    specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS
- * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
- * THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 #ifndef BIT_STREAM_HPP
 #define BIT_STREAM_HPP
 
-#include "common_def.hpp"
 #include <stdint.h>
 #include <stdio.h>
 #include <vector>
+
+#include "common_def.hpp"
+
+namespace EntropyCoding {
 
 /**
  * Model of a writable bitstream that accumulates bits to produce a
@@ -51,7 +21,7 @@ class OutputBitstream {
    *  - &fifo.front() to get a pointer to the data array.
    *    NB, this pointer is only valid until the next push_back()/clear()
    */
-  std::vector<uint8_t> m_fifo;
+  ::std::vector<uint8_t> m_fifo;
 
   uint32_t m_num_held_bits; /// number of bits not flushed to bytestream.
   uint8_t m_held_bits;      /// the bits held and not flushed to bytestream.
@@ -110,13 +80,13 @@ public:
   /**
    * Return a reference to the internal fifo
    */
-  std::vector<uint8_t> &getFIFO();
+  ::std::vector<uint8_t> &getFIFO();
 
   uint8_t getHeldBits();
 
   // OutputBitstream& operator= (const OutputBitstream& src);
   /** Return a reference to the internal fifo */
-  const std::vector<uint8_t> &getFIFO() const;
+  const ::std::vector<uint8_t> &getFIFO() const;
 
   void addSubstream(OutputBitstream *pcSubstream);
   void writeByteAlignment();
@@ -132,8 +102,8 @@ public:
  */
 class InputBitstream {
 protected:
-  std::vector<uint8_t> m_fifo; /// FIFO for storage of complete bytes
-  std::vector<uint32_t> m_emulationPreventionByteLocation;
+  ::std::vector<uint8_t> m_fifo; /// FIFO for storage of complete bytes
+  ::std::vector<uint32_t> m_emulationPreventionByteLocation;
 
   uint32_t m_fifo_idx; /// Read index into m_fifo
 
@@ -180,13 +150,14 @@ public:
 
   void pushEmulationPreventionByteLocation(uint32_t pos);
   uint32_t numEmulationPreventionBytesRead();
-  const std::vector<uint32_t> &getEmulationPreventionByteLocation() const;
+  const ::std::vector<uint32_t> &getEmulationPreventionByteLocation() const;
   uint32_t getEmulationPreventionByteLocation(uint32_t idx);
   void clearEmulationPreventionByteLocation();
-  void setEmulationPreventionByteLocation(const std::vector<uint32_t> &vec);
+  void setEmulationPreventionByteLocation(const ::std::vector<uint32_t> &vec);
 
-  const std::vector<uint8_t> &getFifo() const;
-  std::vector<uint8_t> &getFifo();
+  const ::std::vector<uint8_t> &getFifo() const;
+  ::std::vector<uint8_t> &getFifo();
 };
+} // namespace EntropyCoding
 
 #endif // BIT_STREAM_HPP

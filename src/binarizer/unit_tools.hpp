@@ -1,7 +1,11 @@
+#ifndef __UNIT_TOOLS__
+#define __UNIT_TOOLS__
+
 #include "coding_structure.hpp"
 
-uint32_t getCtuAddr        (const Position& pos, const PreCalcValues &pcv);
+namespace EntropyCoding {
 
+uint32_t getCtuAddr(const Position &pos, const PreCalcValues &pcv);
 
 // CS tools
 namespace CS {
@@ -97,3 +101,6 @@ bool allowLfnstWithMip(const Size &block) {
 
 int getNumModesMip(const Size &block);
 int getMipSizeId(const Size &block);
+} // namespace EntropyCoding
+
+#endif

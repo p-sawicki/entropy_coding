@@ -1,42 +1,11 @@
-/* The copyright in this software is being made available under the BSD
- * License, included below. This software may be subject to other third party
- * and contributor rights, including patent rights, and no such rights are
- * granted under this license.
- *
- * Copyright (c) 2010-2021, ITU/ISO/IEC
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  * Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- *  * Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *  * Neither the name of the ITU/ISO/IEC nor the names of its contributors may
- *    be used to endorse or promote products derived from this software without
- *    specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS
- * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
- * THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 #ifndef TYPE_DEF_HPP
 #define TYPE_DEF_HPP
 
 #include <sstream>
 #include <stdexcept>
 #include <vector>
+
+namespace EntropyCoding {
 
 enum ComponentID {
   COMPONENT_Y = 0,
@@ -322,14 +291,14 @@ struct XUCache {
 #define CH_L CHANNEL_TYPE_LUMA
 #define CH_C CHANNEL_TYPE_CHROMA
 
-class Exception : public std::exception {
+class Exception : public ::std::exception {
 public:
-  Exception(const std::string &_s) : m_str(_s) {}
-  Exception(const Exception &_e) : std::exception(_e), m_str(_e.m_str) {}
+  Exception(const ::std::string &_s) : m_str(_s) {}
+  Exception(const Exception &_e) : ::std::exception(_e), m_str(_e.m_str) {}
   virtual ~Exception() noexcept {};
   virtual const char *what() const noexcept { return m_str.c_str(); }
   Exception &operator=(const Exception &_e) {
-    std::exception::operator=(_e);
+    ::std::exception::operator=(_e);
     m_str = _e.m_str;
     return *this;
   }
@@ -341,7 +310,7 @@ public:
   }
 
 private:
-  std::string m_str;
+  ::std::string m_str;
 };
 
 // if a check fails with THROW or CHECK, please check if ported correctly from
@@ -715,7 +684,7 @@ private:
 };
 
 struct PictureHash {
-  std::vector<uint8_t> hash;
+  ::std::vector<uint8_t> hash;
 
   bool operator==(const PictureHash &other) const {
     if (other.hash.size() != hash.size()) {
@@ -754,5 +723,6 @@ public:
   bool Cb;
   bool Cr;
 };
+} // namespace EntropyCoding
 
 #endif // TYPE_DEF_HPP

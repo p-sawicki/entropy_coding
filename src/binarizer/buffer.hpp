@@ -1,5 +1,9 @@
+#ifndef __BUFFER__
+#define __BUFFER__
+
 #include "common_def.hpp"
-#include "motion_info.hpp"
+
+namespace EntropyCoding {
 
 template <typename T> struct AreaBuf : public Size {
   T *buf;
@@ -35,57 +39,46 @@ typedef AreaBuf<const bool> CPLTtypeBuf;
 
 struct UnitArea;
 
-template<typename T>
-void AreaBuf<T>::fill(const T &val)
-{
-  if( sizeof( T ) == 1 )
-  {
-    if( width == stride )
-    {
-      ::memset( buf, reinterpret_cast< const signed char& >( val ), width * height * sizeof( T ) );
-    }
-    else
-    {
-      T* dest = buf;
-      size_t line = width * sizeof( T );
+template <typename T> void AreaBuf<T>::fill(const T &val) {
+  if (sizeof(T) == 1) {
+    if (width == stride) {
+      ::memset(buf, reinterpret_cast<const signed char &>(val),
+               width * height * sizeof(T));
+    } else {
+      T *dest = buf;
+      size_t line = width * sizeof(T);
 
-      for( unsigned y = 0; y < height; y++ )
-      {
-        ::memset( dest, reinterpret_cast< const signed char& >( val ), line );
+      for (unsigned y = 0; y < height; y++) {
+        ::memset(dest, reinterpret_cast<const signed char &>(val), line);
 
         dest += stride;
       }
     }
-  }
-  else if( T( 0 ) == val )
-  {
-    if( width == stride )
-    {
-      ::memset( buf, 0, width * height * sizeof( T ) );
-    }
-    else
-    {
-      T* dest = buf;
-      size_t line = width * sizeof( T );
+  } else if (T(0) == val) {
+    if (width == stride) {
+      ::memset(buf, 0, width * height * sizeof(T));
+    } else {
+      T *dest = buf;
+      size_t line = width * sizeof(T);
 
-      for( unsigned y = 0; y < height; y++ )
-      {
-        ::memset( dest, 0, line );
+      for (unsigned y = 0; y < height; y++) {
+        ::memset(dest, 0, line);
 
         dest += stride;
       }
     }
-  }
-  else
-  {
-    T* dest = buf;
+  } else {
+    T *dest = buf;
 
-#define FILL_INC        dest      += stride
-#define FILL_OP( ADDR ) dest[ADDR] = val
+#define FILL_INC dest += stride
+#define FILL_OP(ADDR) dest[ADDR] = val
 
-    SIZE_AWARE_PER_EL_OP( FILL_OP, FILL_INC );
+    SIZE_AWARE_PER_EL_OP(FILL_OP, FILL_INC);
 
 #undef FILL_INC
 #undef FILL_OP
   }
 }
+} // namespace EntropyCoding
+
+#endif

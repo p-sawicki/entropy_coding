@@ -1,43 +1,13 @@
-/* The copyright in this software is being made available under the BSD
- * License, included below. This software may be subject to other third party
- * and contributor rights, including patent rights, and no such rights are
- * granted under this license.
- *
- * Copyright (c) 2010-2021, ITU/ISO/IEC
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  * Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- *  * Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *  * Neither the name of the ITU/ISO/IEC nor the names of its contributors may
- *    be used to endorse or promote products derived from this software without
- *    specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS
- * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
- * THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 #ifndef CONTEXTS_HPP
 #define CONTEXTS_HPP
 
-#include "common_def.hpp"
 #include <cstdint>
 #include <initializer_list>
 #include <vector>
+
+#include "common_def.hpp"
+
+namespace EntropyCoding {
 
 static constexpr int PROB_BITS =
     15; // Nominal number of bits to represent probabilities
@@ -57,7 +27,7 @@ class CtxSet {
 public:
   CtxSet(uint16_t offset, uint16_t size);
   CtxSet(const CtxSet &ctxSet);
-  CtxSet(std::initializer_list<CtxSet> ctxSets);
+  CtxSet(::std::initializer_list<CtxSet> ctxSets);
 
 public:
   uint16_t operator()() const;
@@ -156,12 +126,12 @@ public:
   static const CtxSet Palette;
 
 public:
-  static const std::vector<uint8_t> &getInitTable(unsigned initId);
+  static const ::std::vector<uint8_t> &getInitTable(unsigned initId);
 
 private:
-  static std::vector<std::vector<uint8_t>> sm_InitTables;
-  static CtxSet
-  addCtxSet(std::initializer_list<std::initializer_list<uint8_t>> initSet2d);
+  static ::std::vector<::std::vector<uint8_t>> sm_InitTables;
+  static CtxSet addCtxSet(
+      ::std::initializer_list<::std::initializer_list<uint8_t>> initSet2d);
 };
 
 struct BinFracBits {
@@ -228,9 +198,9 @@ public:
   void copyFrom(const CtxStore<BinProbModel> &src);
   void copyFrom(const CtxStore<BinProbModel> &src, const CtxSet &ctxSet);
   void init(int qp, int initId);
-  void setWinSizes(const std::vector<uint8_t> &log2WindowSizes);
-  void loadPStates(const std::vector<uint16_t> &probStates);
-  void savePStates(std::vector<uint16_t> &probStates) const;
+  void setWinSizes(const ::std::vector<uint8_t> &log2WindowSizes);
+  void loadPStates(const ::std::vector<uint16_t> &probStates);
+  void savePStates(::std::vector<uint16_t> &probStates) const;
 
   const BinProbModel &operator[](unsigned ctxId) const;
   BinProbModel &operator[](unsigned ctxId);
@@ -242,7 +212,7 @@ private:
   void checkInit();
 
 private:
-  std::vector<BinProbModel> m_CtxBuffer;
+  ::std::vector<BinProbModel> m_CtxBuffer;
   BinProbModel *m_Ctx;
 };
 
@@ -279,9 +249,9 @@ public:
   void riceStatReset(int bitDepth);
 #endif
 
-  void loadPStates(const std::vector<uint16_t> &probStates);
+  void loadPStates(const ::std::vector<uint16_t> &probStates);
 
-  void savePStates(std::vector<uint16_t> &probStates) const;
+  void savePStates(::std::vector<uint16_t> &probStates) const;
 
   void initCtxAndWinSize(unsigned ctxId, const Ctx &ctx, const uint8_t winSize);
 
@@ -311,5 +281,6 @@ protected:
   int m_baseLevel;
 #endif
 };
+} // namespace EntropyCoding
 
 #endif // CONTEXTS_HPP

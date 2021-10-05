@@ -1,40 +1,9 @@
-/* The copyright in this software is being made available under the BSD
- * License, included below. This software may be subject to other third party
- * and contributor rights, including patent rights, and no such rights are
- * granted under this license.
- *
- * Copyright (c) 2010-2021, ITU/ISO/IEC
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  * Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- *  * Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *  * Neither the name of the ITU/ISO/IEC nor the names of its contributors may
- *    be used to endorse or promote products derived from this software without
- *    specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS
- * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
- * THE POSSIBILITY OF SUCH DAMAGE.
- */
-
 #ifndef COMMON_DEF_HPP
 #define COMMON_DEF_HPP
 
 #include "type_def.hpp"
+
+namespace EntropyCoding {
 
 static const int AFFINE_ME_LIST_SIZE = 4;
 static const int AFFINE_ME_LIST_SIZE_LD = 3;
@@ -468,7 +437,7 @@ static const int EPBIN_WEIGHT_FACTOR = 4;
 static const int ENC_PPS_ID_RPR = 3;
 static const int SCALE_RATIO_BITS = 14;
 static const int MAX_SCALING_RATIO = 2; // max downsampling ratio for RPR
-static const std::pair<int, int> SCALE_1X = std::pair<int, int>(
+static const ::std::pair<int, int> SCALE_1X = ::std::pair<int, int>(
     1 << SCALE_RATIO_BITS, 1 << SCALE_RATIO_BITS); // scale ratio 1x
 static const int DELTA_QP_ACT[4] = {-5, 1, 3, 1};
 static const int MAX_TSRC_RICE = 8; ///< Maximum supported TSRC Rice parameter
@@ -476,17 +445,17 @@ static const int MIN_TSRC_RICE = 1; ///< Minimum supported TSRC Rice parameter
 static const int MAX_CTI_LUT_SIZE =
     64; ///< Maximum colour transform LUT size for CTI SEI
 
-    static const int    MAX_BT_DEPTH  =                                 4;      ///<  <=7
-                                                                            //for P/B slice CTU config. para.
-static const int    MAX_BT_DEPTH_INTER =                            4;      ///< <=7
-                                                                            //for I slice chroma CTB configuration para. (in luma samples)
-static const int    MAX_BT_DEPTH_C      =                           0;      ///< <=7
-static const int    MIN_DUALTREE_CHROMA_WIDTH  =                    4;
-static const int    MIN_DUALTREE_CHROMA_SIZE   =                   16;
-static const SplitSeries SPLIT_BITS         =                       5;
-static const SplitSeries SPLIT_DMULT        =                       5;
-static const SplitSeries SPLIT_MASK         =                      31;      ///< = (1 << SPLIT_BITS) - 1
-
+static const int MAX_BT_DEPTH = 4; ///<  <=7
+                                   // for P/B slice CTU config. para.
+static const int MAX_BT_DEPTH_INTER =
+    4; ///< <=7
+       // for I slice chroma CTB configuration para. (in luma samples)
+static const int MAX_BT_DEPTH_C = 0; ///< <=7
+static const int MIN_DUALTREE_CHROMA_WIDTH = 4;
+static const int MIN_DUALTREE_CHROMA_SIZE = 16;
+static const SplitSeries SPLIT_BITS = 5;
+static const SplitSeries SPLIT_DMULT = 5;
+static const SplitSeries SPLIT_MASK = 31; ///< = (1 << SPLIT_BITS) - 1
 
 template <typename T>
 inline T Clip3(const T minVal, const T maxVal, const T a) {
@@ -719,7 +688,7 @@ public:
   SizeType numHeights() { return (SizeType)m_numBlkSizes; }
   SizeType sizeFrom(SizeType idx) { return m_idxToSizeTab[idx]; }
   SizeType idxFrom(SizeType size) {
-    CHECKD(m_sizeToIdxTab[size] == std::numeric_limits<SizeType>::max(),
+    CHECKD(m_sizeToIdxTab[size] == ::std::numeric_limits<SizeType>::max(),
            "Index of given size does NOT EXIST!");
     return m_sizeToIdxTab[size];
   }
@@ -730,25 +699,25 @@ protected:
   void xInit() {
     m_isCuSize.resize(m_sizeToIdxTab.size(), false);
 
-    std::vector<SizeType> grpSizes;
+    ::std::vector<SizeType> grpSizes;
 
     for (int i = 0, n = 0; i < m_sizeToIdxTab.size(); i++) {
-      if (m_sizeToIdxTab[i] != std::numeric_limits<SizeType>::max()) {
+      if (m_sizeToIdxTab[i] != ::std::numeric_limits<SizeType>::max()) {
         m_sizeToIdxTab[i] = n;
         m_idxToSizeTab.push_back(i);
         n++;
       }
 
-      if (m_sizeToIdxTab[i] != std::numeric_limits<SizeType>::max() &&
-          m_sizeToIdxTab[i >> 1] != std::numeric_limits<SizeType>::max() &&
+      if (m_sizeToIdxTab[i] != ::std::numeric_limits<SizeType>::max() &&
+          m_sizeToIdxTab[i >> 1] != ::std::numeric_limits<SizeType>::max() &&
           i >= 4) {
         m_isCuSize[i] = true;
       }
 
       // collect group sizes (for coefficient group coding)
       SizeType grpSize = i >> ((i & 3) != 0 ? 1 : 2);
-      if (m_sizeToIdxTab[i] != std::numeric_limits<SizeType>::max() &&
-          m_sizeToIdxTab[grpSize] == std::numeric_limits<SizeType>::max()) {
+      if (m_sizeToIdxTab[i] != ::std::numeric_limits<SizeType>::max() &&
+          m_sizeToIdxTab[grpSize] == ::std::numeric_limits<SizeType>::max()) {
         grpSizes.push_back(grpSize);
       }
     }
@@ -757,38 +726,41 @@ protected:
 
     for (SizeType grpSize : grpSizes) {
       if (grpSize > 0 &&
-          m_sizeToIdxTab[grpSize] == std::numeric_limits<SizeType>::max()) {
+          m_sizeToIdxTab[grpSize] == ::std::numeric_limits<SizeType>::max()) {
         m_sizeToIdxTab[grpSize] = (SizeType)m_idxToSizeTab.size();
         m_idxToSizeTab.push_back(grpSize);
       }
     }
   };
 
-  std::vector<bool> m_isCuSize;
+  ::std::vector<bool> m_isCuSize;
   int m_numBlkSizes; // as opposed to number all sizes, which also contains
                      // grouped sizes
-  std::vector<SizeType> m_sizeToIdxTab;
-  std::vector<SizeType> m_idxToSizeTab;
+  ::std::vector<SizeType> m_sizeToIdxTab;
+  ::std::vector<SizeType> m_idxToSizeTab;
 };
 
-inline size_t rsAddr(const Position &pos, const uint32_t stride, const UnitScale &unitScale )
-{
-  return (size_t)(stride >> unitScale.posx) * (size_t)(pos.y >> unitScale.posy) + (size_t)(pos.x >> unitScale.posx);
+inline size_t rsAddr(const Position &pos, const uint32_t stride,
+                     const UnitScale &unitScale) {
+  return (size_t)(stride >> unitScale.posx) *
+             (size_t)(pos.y >> unitScale.posy) +
+         (size_t)(pos.x >> unitScale.posx);
 }
 
-inline size_t rsAddr(const Position &pos, const Position &origin, const uint32_t stride, const UnitScale &unitScale )
-{
-  return (stride >> unitScale.posx) * ((pos.y - origin.y) >> unitScale.posy) + ((pos.x - origin.x) >> unitScale.posx);
+inline size_t rsAddr(const Position &pos, const Position &origin,
+                     const uint32_t stride, const UnitScale &unitScale) {
+  return (stride >> unitScale.posx) * ((pos.y - origin.y) >> unitScale.posy) +
+         ((pos.x - origin.x) >> unitScale.posx);
 }
 
-inline size_t rsAddr(const Position &pos, const uint32_t stride )
-{
+inline size_t rsAddr(const Position &pos, const uint32_t stride) {
   return stride * (size_t)pos.y + (size_t)pos.x;
 }
 
-inline size_t rsAddr(const Position &pos, const Position &origin, const uint32_t stride )
-{
+inline size_t rsAddr(const Position &pos, const Position &origin,
+                     const uint32_t stride) {
   return stride * (pos.y - origin.y) + (pos.x - origin.x);
 }
+} // namespace EntropyCoding
 
 #endif // COMMON_DEF_HPP

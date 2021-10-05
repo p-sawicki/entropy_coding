@@ -1,53 +1,15 @@
-/* The copyright in this software is being made available under the BSD
- * License, included below. This software may be subject to other third party
- * and contributor rights, including patent rights, and no such rights are
- * granted under this license.
- *
- * Copyright (c) 2010-2021, ITU/ISO/IEC
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  * Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- *  * Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *  * Neither the name of the ITU/ISO/IEC nor the names of its contributors may
- *    be used to endorse or promote products derived from this software without
- *    specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS
- * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
- * THE POSSIBILITY OF SUCH DAMAGE.
- */
+#include <algorithm>
+#include <limits>
+#include <map>
 
-/** \file     CABACWriter.cpp
- *  \brief    Writer for low level syntax
- */
-
-#include "cabac_writer.hpp"
 #include "arith_codec.hpp"
+#include "cabac_writer.hpp"
 #include "contexts.hpp"
 #include "log.hpp"
 #include "sample_adaptive_offset.hpp"
 #include "unit_tools.hpp"
 
-#include <algorithm>
-#include <limits>
-#include <map>
-
-//! \ingroup EncoderLib
-//! \{
+namespace EntropyCoding {
 
 void CABACWriter::initCtxModels(const Slice &slice) {
   int qp = slice.getSliceQp();
@@ -116,13 +78,13 @@ SliceType CABACWriter::getCtxInitId(const Slice &slice) {
   }
 }
 
-unsigned estBits(BinEncIf &binEnc, const std::vector<bool> &bins,
+unsigned estBits(BinEncIf &binEnc, const ::std::vector<bool> &bins,
                  const Ctx &ctx, const int ctxId, const uint8_t winSize) {
   binEnc.initCtxAndWinSize(ctxId, ctx, winSize);
   binEnc.start();
-  const std::size_t numBins = bins.size();
+  const ::std::size_t numBins = bins.size();
   unsigned startBits = binEnc.getNumWrittenBits();
-  for (std::size_t binId = 0; binId < numBins; binId++) {
+  for (::std::size_t binId = 0; binId < numBins; binId++) {
     unsigned bin = (bins[binId] ? 1 : 0);
     binEnc.encodeBin(bin, ctxId);
   }
@@ -1069,7 +1031,7 @@ void CABACWriter::intra_luma_pred_modes(const CodingUnit &cu) {
       unsigned ipred_mode = ipred_modes[k];
 
       // sorting of MPMs
-      std::sort(mpm_pred, mpm_pred + numMPMs);
+      ::std::sort(mpm_pred, mpm_pred + numMPMs);
 
       for (int idx = numMPMs - 1; idx >= 0; idx--) {
         if (ipred_mode > mpm_pred[idx]) {
@@ -1148,7 +1110,7 @@ void CABACWriter::intra_luma_pred_mode(const PredictionUnit &pu) {
       m_BinEncoder.encodeBinEP(mpm_idx > 4);
     }
   } else {
-    std::sort(mpm_pred, mpm_pred + numMPMs);
+    ::std::sort(mpm_pred, mpm_pred + numMPMs);
     for (int idx = numMPMs - 1; idx >= 0; idx--) {
       if (ipred_mode > mpm_pred[idx]) {
         ipred_mode--;
@@ -2391,7 +2353,7 @@ void CABACWriter::transform_unit(const TransformUnit &tu, CUCtx &cuCtx,
 
 void CABACWriter::cu_qp_delta(const CodingUnit &cu, int predQP,
                               const int8_t qp) {
-  CHECK(!(predQP != std::numeric_limits<int>::max()), "Unspecified error");
+  CHECK(!(predQP != ::std::numeric_limits<int>::max()), "Unspecified error");
   int DQp = qp - predQP;
   int qpBdOffsetY = cu.cs->sps->getQpBDOffset(CHANNEL_TYPE_LUMA);
   DQp = (DQp + (MAX_QP + 1) + (MAX_QP + 1) / 2 + qpBdOffsetY +
@@ -2399,7 +2361,7 @@ void CABACWriter::cu_qp_delta(const CodingUnit &cu, int predQP,
             ((MAX_QP + 1) + qpBdOffsetY) -
         (MAX_QP + 1) / 2 - (qpBdOffsetY / 2);
   unsigned absDQP = unsigned(DQp < 0 ? -DQp : DQp);
-  unsigned unaryDQP = std::min<unsigned>(absDQP, CU_DQP_TU_CMAX);
+  unsigned unaryDQP = ::std::min<unsigned>(absDQP, CU_DQP_TU_CMAX);
 
   binLogger.LogElements(SyntaxElement::cu_qp_delta_abs, unaryDQP);
   unary_max_symbol(unaryDQP, Ctx::DeltaQP(), Ctx::DeltaQP(1), CU_DQP_TU_CMAX);
@@ -2482,7 +2444,7 @@ void CABACWriter::residual_coding(const TransformUnit &tu, ComponentID compID,
 
   // determine and set last coeff position and sig group flags
   int scanPosLast = -1;
-  std::bitset<MLS_GRP_NUM> sigGroupFlags;
+  ::std::bitset<MLS_GRP_NUM> sigGroupFlags;
   for (int scanPos = 0; scanPos < cctx.maxNumCoeff(); scanPos++) {
     unsigned blkPos = cctx.blockPos(scanPos);
     if (coeff[blkPos]) {
@@ -2623,7 +2585,7 @@ void CABACWriter::residual_lfnst_mode(const CodingUnit &cu, CUCtx &cuCtx) {
       (cu.cs->sps->getUseLFNST() && CU::isIntra(cu) && cu.mipFlag &&
        !allowLfnstWithMip(cu.firstPU->lumaSize())) ||
       (cu.isSepTree() && cu.chType == CHANNEL_TYPE_CHROMA &&
-       std::min(cu.blocks[1].width, cu.blocks[1].height) < 4) ||
+       ::std::min(cu.blocks[1].width, cu.blocks[1].height) < 4) ||
       (cu.blocks[chIdx].lumaSize().width > cu.cs->sps->getMaxTbSize() ||
        cu.blocks[chIdx].lumaSize().height > cu.cs->sps->getMaxTbSize())) {
     return;
@@ -2814,7 +2776,7 @@ void CABACWriter::residual_coding_subblock(CoeffCodingContext &cctx,
       ctxOff = cctx.ctxOffsetAbs();
       numNonZero++;
       firstNZPos = nextSigPos;
-      lastNZPos = std::max<int>(lastNZPos, nextSigPos);
+      lastNZPos = ::std::max<int>(lastNZPos, nextSigPos);
       remAbsLevel = abs(Coeff) - 1;
 
       if (nextSigPos != cctx.scanPosLast())
@@ -2889,7 +2851,7 @@ void CABACWriter::residual_coding_subblock(CoeffCodingContext &cctx,
     if (absLevel) {
       numNonZero++;
       firstNZPos = scanPos;
-      lastNZPos = std::max<int>(lastNZPos, scanPos);
+      lastNZPos = ::std::max<int>(lastNZPos, scanPos);
       signPattern <<= 1;
       if (Coeff < 0)
         signPattern++;
@@ -2918,7 +2880,7 @@ void CABACWriter::residual_codingTS(const TransformUnit &tu,
   cctx.setNumCtxBins(maxCtxBins);
 
   // determine and set last coeff position and sig group flags
-  std::bitset<MLS_GRP_NUM> sigGroupFlags;
+  ::std::bitset<MLS_GRP_NUM> sigGroupFlags;
   for (int scanPos = 0; scanPos < cctx.maxNumCoeff(); scanPos++) {
     unsigned blkPos = cctx.blockPos(scanPos);
     if (coeff[blkPos]) {
@@ -3108,7 +3070,7 @@ void CABACWriter::residual_coding_subblockTS(CoeffCodingContext &cctx,
 void CABACWriter::unary_max_symbol(unsigned symbol, unsigned ctxId0,
                                    unsigned ctxIdN, unsigned maxSymbol) {
   CHECK(symbol > maxSymbol, "symbol > maxSymbol");
-  const unsigned totalBinsToWrite = std::min(symbol + 1, maxSymbol);
+  const unsigned totalBinsToWrite = ::std::min(symbol + 1, maxSymbol);
   for (unsigned binsWritten = 0; binsWritten < totalBinsToWrite;
        ++binsWritten) {
     const unsigned nextBin = symbol > binsWritten;
@@ -3415,5 +3377,4 @@ void CABACWriter::codeAlfCtuAlternative(CodingStructure &cs, uint32_t ctuRsAddr,
     }
   }
 }
-
-//! \}
+} // namespace EntropyCoding

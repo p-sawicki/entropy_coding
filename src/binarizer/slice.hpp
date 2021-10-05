@@ -1,40 +1,3 @@
-/* The copyright in this software is being made available under the BSD
- * License, included below. This software may be subject to other third party
- * and contributor rights, including patent rights, and no such rights are
- * granted under this license.
- *
- * Copyright (c) 2010-2021, ITU/ISO/IEC
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  * Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- *  * Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *  * Neither the name of the ITU/ISO/IEC nor the names of its contributors may
- *    be used to endorse or promote products derived from this software without
- *    specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS
- * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
- * THE POSSIBILITY OF SUCH DAMAGE.
- */
-
-/** \file     Slice.h
-    \brief    slice header and SPS class (header)
-*/
-
 #ifndef __SLICE__
 #define __SLICE__
 
@@ -45,12 +8,11 @@
 #include <vector>
 
 #include "alf_parameters.hpp"
-#include "hrd.hpp"
 #include "picture.hpp"
 #include "unit.hpp"
 
-//! \ingroup CommonLib
-//! \{
+namespace EntropyCoding {
+
 struct MotionInfo;
 
 struct Picture;
@@ -62,12 +24,11 @@ class TrQuant;
 class PreCalcValues;
 static const uint32_t REF_PIC_LIST_NUM_IDX = 32;
 
-typedef std::list<Picture *> PicList;
+typedef ::std::list<Picture *> PicList;
 
 // ====================================================================================================================
 // Class definition
 // ====================================================================================================================
-
 
 /// SPS RExt class
 class SPSRExt // Names aligned to text specification
@@ -76,6 +37,7 @@ private:
   bool m_extendedPrecisionProcessingFlag;
   bool m_tsrcRicePresentFlag;
   bool m_persistentRiceAdaptationEnabledFlag;
+  bool m_rrcRiceExtensionEnableFlag;
 
 public:
   bool getExtendedPrecisionProcessingFlag() const {
@@ -86,6 +48,10 @@ public:
 
   bool getPersistentRiceAdaptationEnabledFlag() const {
     return m_persistentRiceAdaptationEnabledFlag;
+  }
+
+  bool getRrcRiceExtensionEnableFlag() const {
+    return m_rrcRiceExtensionEnableFlag;
   }
 };
 
@@ -102,13 +68,13 @@ private:
   unsigned m_CTUSize;
   uint32_t m_uiMaxCUWidth;
 
-   // Tool list
+  // Tool list
 
   bool m_transformSkipEnabledFlag;
   int m_log2MaxTransformSkipBlockSize;
   bool m_BDPCMEnabledFlag;
   bool m_JointCbCrEnabledFlag;
-   // Parameter
+  // Parameter
   BitDepths m_bitDepths;
   bool m_entropyCodingSyncEnabledFlag; //!< Flag for enabling WPP
   int m_qpBDOffset[MAX_NUM_CHANNEL_TYPE];
@@ -152,7 +118,7 @@ public:
   }
   bool getBDPCMEnabledFlag() const { return m_BDPCMEnabledFlag; }
   uint32_t getMaxTbSize() const { return 1 << m_log2MaxTbSize; }
-// Bit-depth
+  // Bit-depth
   int getBitDepth(ChannelType type) const { return m_bitDepths.recon[type]; }
   const BitDepths &getBitDepths() const { return m_bitDepths; }
 
@@ -162,14 +128,14 @@ public:
 #if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
   int getMaxLog2TrDynamicRange(ChannelType channelType) const {
     return getSpsRangeExtension().getExtendedPrecisionProcessingFlag()
-               ? std::min<int>(20, int(m_bitDepths.recon[channelType] + 6))
+               ? ::std::min<int>(20, int(m_bitDepths.recon[channelType] + 6))
                : 15;
   }
 #else
   int getMaxLog2TrDynamicRange(ChannelType channelType) const {
     return getSpsRangeExtension().getExtendedPrecisionProcessingFlag() &&
                    int(m_bitDepths.recon[channelType]) > 10
-               ? std::min<int>(20, int(m_bitDepths.recon[channelType] + 6))
+               ? ::std::min<int>(20, int(m_bitDepths.recon[channelType] + 6))
                : 15;
   }
 #endif
@@ -215,17 +181,17 @@ class PPS {
 private:
   bool m_useDQP;
 
- // Chroma QP Adjustments
+  // Chroma QP Adjustments
   int m_chromaQpOffsetListLen; // size (excludes the null entry used in the
                                // following array).
-  uint8_t m_ctuSize;         //!< CTU size
-  uint32_t m_numTileCols;    //!< number of tile columns
-  std::vector<uint32_t>
+  uint8_t m_ctuSize;           //!< CTU size
+  uint32_t m_numTileCols;      //!< number of tile columns
+  ::std::vector<uint32_t>
       m_tileColBd; //!< tile column left-boundaries in units of CTUs
-  std::vector<uint32_t> m_ctuToTileCol; //!< mapping between CTU horizontal
-                                        //!< address and tile column index
-  std::vector<uint32_t> m_ctuToTileRow; //!< mapping between CTU vertical
-                                        //!< address and tile row index
+  ::std::vector<uint32_t> m_ctuToTileCol; //!< mapping between CTU horizontal
+                                          //!< address and tile column index
+  ::std::vector<uint32_t> m_ctuToTileRow; //!< mapping between CTU vertical
+                                          //!< address and tile row index
 
   bool m_cabacInitPresentFlag;
   uint32_t m_picWidthInLumaSamples;
@@ -308,7 +274,7 @@ private:
                                           //!< subdivision for intra slices
   uint32_t m_cuChromaQpOffsetSubdivInter; //!< CU chroma QP offset maximum
                                           //!< subdivision for inter slices
-  bool m_mvdL1ZeroFlag; //!< L1 MVD set to zero flag
+  bool m_mvdL1ZeroFlag;                   //!< L1 MVD set to zero flag
   uint32_t
       m_maxNumAffineMergeCand; //!< max number of sub-block merge candidates
   unsigned m_minQT[3]; //!< minimum quad-tree size  0: I slice luma; 1: P/B
@@ -362,13 +328,13 @@ public:
 class Slice {
 
 private:
-//  Bitstream writing
+  //  Bitstream writing
   bool m_saoEnabledFlag[MAX_NUM_CHANNEL_TYPE];
   SliceType m_eSliceType;
   int m_iSliceQp;
   bool m_ChromaQpAdjEnabled;
-  bool m_depQuantEnabledFlag; //!< dependent quantization enabled flag
-  int m_riceBaseLevelValue;   //< baseLevel value for abs_remainder
+  bool m_depQuantEnabledFlag;       //!< dependent quantization enabled flag
+  int m_riceBaseLevelValue;         //< baseLevel value for abs_remainder
   bool m_signDataHidingEnabledFlag; //!< sign data hiding enabled flag
   bool m_tsResidualCodingDisabledFlag;
   int m_aiNumRefIdx[NUM_REF_PIC_LIST_01]; //  for multiple reference of current
@@ -379,7 +345,7 @@ private:
   bool m_biDirPred;
   int m_symRefIdx[2];
 
-// access channel
+  // access channel
   const SPS *m_pcSPS;
   const PPS *m_pcPPS;
   Picture *m_pcPic;
@@ -401,6 +367,7 @@ private:
   int m_alfApsIdChroma;
   int m_tsrc_index;
   unsigned m_riceBit[8];
+
 public:
   const PicHeader *getPicHeader() const { return m_pcPicHeader; }
   const SPS *getSPS() const { return m_pcSPS; }
@@ -470,7 +437,7 @@ public:
   const bool multiBlock422;
   const unsigned maxCUWidth;
   const unsigned maxCUHeight;
-// to get CTU position, use (x & maxCUWidthMask) rather than (x % maxCUWidth)
+  // to get CTU position, use (x & maxCUWidthMask) rather than (x % maxCUWidth)
   const unsigned maxCUWidthMask;
   const unsigned maxCUHeightMask;
   const unsigned maxCUWidthLog2;
@@ -480,7 +447,7 @@ public:
   const bool noChroma2x2;
   const bool ISingleTree;
 
-// private:
+  // private:
   const unsigned maxBtDepth[3];
   const unsigned minBtSize[3];
   const unsigned maxBtSize[3];
@@ -490,7 +457,7 @@ public:
 
   unsigned getValIdx(const Slice &slice, const ChannelType chType) const;
 
-// public:
+  // public:
   unsigned getMaxBtDepth(const Slice &slice, const ChannelType chType) const;
   unsigned getMinBtSize(const Slice &slice, const ChannelType chType) const;
   unsigned getMaxBtSize(const Slice &slice, const ChannelType chType) const;
@@ -498,5 +465,6 @@ public:
   unsigned getMaxTtSize(const Slice &slice, const ChannelType chType) const;
   unsigned getMinQtSize(const Slice &slice, const ChannelType chType) const;
 };
+} // namespace EntropyCoding
 
 #endif // __SLICE__

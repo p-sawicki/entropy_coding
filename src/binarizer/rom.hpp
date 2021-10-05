@@ -1,5 +1,7 @@
 #include "common_def.hpp"
 
+namespace EntropyCoding {
+
 // ====================================================================================================================
 // Scanning order & context mapping table
 // ====================================================================================================================
@@ -46,6 +48,7 @@ struct ScanElement {
   uint16_t y;
 };
 
-extern       uint32_t   g_log2SbbSize[MAX_CU_DEPTH + 1][MAX_CU_DEPTH + 1][2];
+extern uint32_t g_log2SbbSize[MAX_CU_DEPTH + 1][MAX_CU_DEPTH + 1][2];
 extern uint8_t g_paletteRunTopLut[5];
 extern uint8_t g_paletteRunLeftLut[5];
+} // namespace EntropyCoding

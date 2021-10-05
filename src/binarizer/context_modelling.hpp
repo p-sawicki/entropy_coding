@@ -1,42 +1,7 @@
-/* The copyright in this software is being made available under the BSD
- * License, included below. This software may be subject to other third party
- * and contributor rights, including patent rights, and no such rights are
- * granted under this license.
- *
- * Copyright (c) 2010-2021, ITU/ISO/IEC
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  * Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- *  * Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *  * Neither the name of the ITU/ISO/IEC nor the names of its contributors may
- *    be used to endorse or promote products derived from this software without
- *    specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS
- * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
- * THE POSSIBILITY OF SUCH DAMAGE.
- */
-
-/** \file     ContextModelling.h
- *  \brief    Classes providing probability descriptions and contexts (header)
- */
-
 #ifndef __CONTEXTMODELLING__
 #define __CONTEXTMODELLING__
+
+#include <bitset>
 
 #include "contexts.hpp"
 #include "rom.hpp"
@@ -44,7 +9,7 @@
 #include "unit.hpp"
 #include "unit_partitioner.hpp"
 
-#include <bitset>
+namespace EntropyCoding {
 
 struct CoeffCodingContext {
 public:
@@ -113,7 +78,7 @@ public:
 #define UPDATE(x)                                                              \
   {                                                                            \
     TCoeff a = abs(x);                                                         \
-    sumAbs += std::min(4 + (a & 1), a);                                        \
+    sumAbs += ::std::min(4 + (a & 1), a);                                      \
     numPos += int(!!a);                                                        \
   }
     if (posX < m_width - 1) {
@@ -134,7 +99,7 @@ public:
 #undef UPDATE
 
     int ctxOfs =
-        int(std::min<TCoeff>((sumAbs + 1) >> 1, 3)) + (diag < 2 ? 4 : 0);
+        int(::std::min<TCoeff>((sumAbs + 1) >> 1, 3)) + (diag < 2 ? 4 : 0);
 
     if (m_chType == CHANNEL_TYPE_LUMA) {
       ctxOfs += diag < 5 ? 4 : 0;
@@ -142,13 +107,13 @@ public:
 
     m_tmplCpDiag = diag;
     m_tmplCpSum1 = sumAbs - numPos;
-    return m_sigFlagCtxSet[std::max(0, state - 1)](ctxOfs);
+    return m_sigFlagCtxSet[::std::max(0, state - 1)](ctxOfs);
   }
 
   uint8_t ctxOffsetAbs() {
     int offset = 0;
     if (m_tmplCpDiag != -1) {
-      offset = int(std::min<TCoeff>(m_tmplCpSum1, 4)) + 1;
+      offset = int(::std::min<TCoeff>(m_tmplCpSum1, 4)) + 1;
       offset += (!m_tmplCpDiag
                      ? (m_chType == CHANNEL_TYPE_LUMA ? 15 : 5)
                      : m_chType == CHANNEL_TYPE_LUMA
@@ -188,7 +153,7 @@ public:
       }
     }
     return unsigned(
-        std::max<TCoeff>(std::min<TCoeff>(sum - 5 * baseLevel, 31), 0));
+        ::std::max<TCoeff>(::std::min<TCoeff>(sum - 5 * baseLevel, 31), 0));
   }
 
   void updateRiceStat(unsigned &riceStat, TCoeff rem, int remainderFlag) {
@@ -252,10 +217,10 @@ public:
     int currentShift = templateAbsCompare(sum);
     sum = sum >> currentShift;
     if (baseLevel == 0) {
-      riceParam = unsigned(std::min<TCoeff>(sum, 31));
+      riceParam = unsigned(::std::min<TCoeff>(sum, 31));
     } else {
-      riceParam =
-          unsigned(std::max<TCoeff>(std::min<TCoeff>(sum - baseLevel, 31), 0));
+      riceParam = unsigned(
+          ::std::max<TCoeff>(::std::min<TCoeff>(sum - baseLevel, 31), 0));
     }
 
     riceParam = g_goRiceParsCoeff[riceParam] + currentShift;
@@ -331,7 +296,7 @@ public:
     return m_tsLrg1FlagCtxSet(numPos);
   }
 
-   template <typename T> int sgn(T val) { return (T(0) < val) - (val < T(0)); }
+  template <typename T> int sgn(T val) { return (T(0) < val) - (val < T(0)); }
 
   unsigned signCtxIdAbsTS(int scanPos, const TCoeff *coeff, int bdpcm) {
     const uint32_t posY = m_scan[scanPos].y;
@@ -388,7 +353,7 @@ public:
     int absCoeffMod = int(absCoeff);
 
     if (bdpcm == 0) {
-      pred1 = std::max(absBelow, absRight);
+      pred1 = ::std::max(absBelow, absRight);
 
       if (absCoeffMod == pred1) {
         absCoeffMod = 1;
@@ -407,7 +372,7 @@ public:
     }
 
     int pred1, absBelow = abs(belowPixel), absRight = abs(rightPixel);
-    pred1 = std::max(absBelow, absRight);
+    pred1 = ::std::max(absBelow, absRight);
 
     TCoeff absCoeffMod;
 
@@ -427,8 +392,8 @@ public:
   bool getUpdateHist() { return m_updateHist; };
   void setUpdateHist(bool value) { m_updateHist = value; };
 
- private:
-//   // constant
+private:
+  //   // constant
   const ComponentID m_compID;
   const ChannelType m_chType;
   const unsigned m_width;
@@ -456,7 +421,7 @@ public:
   const int m_lastShiftY;
   const TCoeff m_minCoeff;
   const TCoeff m_maxCoeff;
-   // modified
+  // modified
   int m_scanPosLast;
   int m_subSetId;
   int m_subSetPos;
@@ -477,16 +442,14 @@ public:
   CtxSet m_tsLrg1FlagCtxSet;
   CtxSet m_tsSignFlagCtxSet;
   int m_remainingContextBins;
-  std::bitset<MLS_GRP_NUM> m_sigCoeffGroupFlag;
+  ::std::bitset<MLS_GRP_NUM> m_sigCoeffGroupFlag;
   const bool m_bdpcm;
   int m_cctxBaseLevel;
   TCoeff m_histValue;
   bool m_updateHist;
 };
 
-class MergeCtx
-{
-};
+class MergeCtx {};
 
 class CUCtx {
 public:
@@ -498,7 +461,7 @@ public:
     violatesMtsCoeffConstraint = false;
     mtsLastScanPos = false;
   }
-   ~CUCtx() = default;
+  ~CUCtx() = default;
 
   bool isDQPCoded;
   bool isChromaQpAdjCoded;
@@ -525,5 +488,6 @@ unsigned CtxIBCFlag(const CodingUnit &cu);
 unsigned CtxMipFlag(const CodingUnit &cu);
 unsigned CtxPltCopyFlag(const unsigned prevRunType, const unsigned dist);
 } // namespace DeriveCtx
+} // namespace EntropyCoding
 
 #endif // __CONTEXTMODELLING__

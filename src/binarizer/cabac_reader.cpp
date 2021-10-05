@@ -1,40 +1,3 @@
-/* The copyright in this software is being made available under the BSD
- * License, included below. This software may be subject to other third party
- * and contributor rights, including patent rights, and no such rights are
- * granted under this license.
- *
- * Copyright (c) 2010-2021, ITU/ISO/IEC
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- *  * Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- *  * Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- *  * Neither the name of the ITU/ISO/IEC nor the names of its contributors may
- *    be used to endorse or promote products derived from this software without
- *    specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS
- * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
- * THE POSSIBILITY OF SUCH DAMAGE.
- */
-
-/** \file     CABACReader.cpp
- *  \brief    Reader for low level syntax
- */
-
 #include <algorithm>
 
 #include "cabac_reader.hpp"
@@ -42,6 +5,8 @@
 #include "picture.hpp"
 #include "sample_adaptive_offset.hpp"
 #include "unit_tools.hpp"
+
+namespace EntropyCoding {
 
 #if RExt__DECODER_DEBUG_BIT_STATISTICS
 #define RExt__DECODER_DEBUG_BIT_STATISTICS_CREATE_SET(x)                       \
@@ -122,7 +87,7 @@ void CABACReader::remaining_bytes(bool noTrailingBytesExpected) {
       unsigned trailingNullByte = m_Bitstream->readByte();
       if (trailingNullByte != 0) {
         THROW("Trailing byte should be '0', but has a value of "
-              << std::hex << trailingNullByte << std::dec << "\n");
+              << ::std::hex << trailingNullByte << ::std::dec << "\n");
       }
     }
   }
@@ -1281,7 +1246,7 @@ void CABACReader::intra_luma_pred_modes(CodingUnit &cu) {
 
       xReadTruncBinCode(ipred_mode, NUM_LUMA_MODE - NUM_MOST_PROBABLE_MODES);
       // postponed sorting of MPMs (only in remaining branch)
-      std::sort(mpm_pred, mpm_pred + NUM_MOST_PROBABLE_MODES);
+      ::std::sort(mpm_pred, mpm_pred + NUM_MOST_PROBABLE_MODES);
 
       for (uint32_t i = 0; i < NUM_MOST_PROBABLE_MODES; i++) {
         ipred_mode += (ipred_mode >= mpm_pred[i]);
@@ -2262,7 +2227,7 @@ void CABACReader::transform_tree(CodingStructure &cs, Partitioner &partitioner,
   } else {
     TransformUnit &tu =
         cs.addTU(CS::getArea(cs, area, partitioner.chType), partitioner.chType);
-    unsigned numBlocks = ::getNumberValidTBlocks(*cs.pcv);
+    unsigned numBlocks = getNumberValidTBlocks(*cs.pcv);
     tu.checkTuNoResidual(partitioner.currPartIdx());
 
     for (unsigned compID = COMPONENT_Y; compID < numBlocks; compID++) {
@@ -2490,7 +2455,7 @@ void CABACReader::transform_unit(TransformUnit &tu, CUCtx &cuCtx,
 void CABACReader::cu_qp_delta(CodingUnit &cu, int predQP, int8_t &qp) {
   RExt__DECODER_DEBUG_BIT_STATISTICS_CREATE_SET(STATS__CABAC_BITS__DELTA_QP_EP);
 
-  CHECK(predQP == std::numeric_limits<int>::max(), "Invalid predicted QP");
+  CHECK(predQP == ::std::numeric_limits<int>::max(), "Invalid predicted QP");
   int qpY = predQP;
   int DQp = unary_max_symbol(Ctx::DeltaQP(), Ctx::DeltaQP(1), CU_DQP_TU_CMAX);
   if (DQp >= CU_DQP_TU_CMAX) {
@@ -2712,7 +2677,7 @@ void CABACReader::residual_lfnst_mode(CodingUnit &cu, CUCtx &cuCtx) {
       (cu.cs->sps->getUseLFNST() && CU::isIntra(cu) && cu.mipFlag &&
        !allowLfnstWithMip(cu.firstPU->lumaSize())) ||
       (cu.isSepTree() && cu.chType == CHANNEL_TYPE_CHROMA &&
-       std::min(cu.blocks[1].width, cu.blocks[1].height) < 4) ||
+       ::std::min(cu.blocks[1].width, cu.blocks[1].height) < 4) ||
       (cu.blocks[chIdx].lumaSize().width > cu.cs->sps->getMaxTbSize() ||
        cu.blocks[chIdx].lumaSize().height > cu.cs->sps->getMaxTbSize())) {
     return;
@@ -2916,7 +2881,7 @@ void CABACReader::residual_coding_subblock(CoeffCodingContext &cctx,
       ctxOff = cctx.ctxOffsetAbs();
       sigBlkPos[numNonZero++] = blkPos;
       firstNZPos = nextSigPos;
-      lastNZPos = std::max<int>(lastNZPos, nextSigPos);
+      lastNZPos = ::std::max<int>(lastNZPos, nextSigPos);
 
       RExt__DECODER_DEBUG_BIT_STATISTICS_SET(ctype_gt1);
       unsigned gt1Flag = m_BinDecoder.decodeBin(cctx.greater1CtxIdAbs(ctxOff));
@@ -2983,7 +2948,7 @@ void CABACReader::residual_coding_subblock(CoeffCodingContext &cctx,
       int blkPos = cctx.blockPos(scanPos);
       sigBlkPos[numNonZero++] = blkPos;
       firstNZPos = scanPos;
-      lastNZPos = std::max<int>(lastNZPos, scanPos);
+      lastNZPos = ::std::max<int>(lastNZPos, scanPos);
       coeff[blkPos] = tcoeff;
     }
   }
@@ -3306,3 +3271,4 @@ void CABACReader::mip_pred_mode(PredictionUnit &pu) {
              pu.intraDir[CHANNEL_TYPE_LUMA] >= numModes,
          "Invalid MIP mode");
 }
+} // namespace EntropyCoding
