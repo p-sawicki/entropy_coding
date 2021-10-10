@@ -644,7 +644,7 @@ uint32_t BitEstimatorBase::getNumBins() {
   return 0;
 }
 
-unsigned getNumWrittenBits() { return (uint32_t)0; }
+unsigned BitEstimatorBase::getNumWrittenBits() { return (uint32_t)0; }
 
 bool BitEstimatorBase::isEncoding() { return false; }
 

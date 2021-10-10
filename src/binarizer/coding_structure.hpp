@@ -1,5 +1,5 @@
-#ifndef __CODINGSTRUCTURE__
-#define __CODINGSTRUCTURE__
+#ifndef ENTROPY_CODEC_CODING_STRUCTURE
+#define ENTROPY_CODEC_CODING_STRUCTURE
 
 #include <vector>
 
@@ -39,12 +39,78 @@ public:
   CodingStructure *parent;
   Slice *slice;
 
-  UnitScale unitScale[MAX_NUM_COMPONENT];
+  ::std::array<UnitScale, MAX_NUM_COMPONENT> unitScale;
   int chromaQpAdj;
   const SPS *sps;
   const PPS *pps;
   PicHeader *picHeader;
   const PreCalcValues *pcv;
+
+  CodingStructure(const UnitArea &_area, Picture *_picture,
+                  CodingStructure *_parent, Slice *_slice,
+                  const ::std::array<UnitScale, MAX_NUM_COMPONENT> &_unitScale,
+                  const int _chromaQpAdj, const SPS *_sps, const PPS *_pps,
+                  PicHeader *_picHeader, const PreCalcValues *_pcv,
+                  const TreeType _treeType, const ModeType _modeType,
+                  const ::std::vector<CodingUnit *> &_cus,
+                  const ::std::vector<PredictionUnit *> &_pus,
+                  const ::std::vector<TransformUnit *> &_tus,
+                  const PLTBuf &_prevPLT, bool isTuEnc,
+                  unsigned *const cuIdx[MAX_NUM_CHANNEL_TYPE],
+                  unsigned *const puIdx[MAX_NUM_CHANNEL_TYPE],
+                  unsigned *const tuIdx[MAX_NUM_CHANNEL_TYPE],
+                  const unsigned numCUs, const unsigned numPUs,
+                  const unsigned numTUs, const CUCache &cuCache,
+                  const PUCache &puCache, const TUCache &tuCache,
+                  TCoeff *const coeffs[MAX_NUM_COMPONENT],
+                  Pel *const pcmbuf[MAX_NUM_COMPONENT],
+                  bool *const runType[MAX_NUM_CHANNEL_TYPE], const int *offsets)
+      : area(_area), picture(_picture), parent(_parent), slice(_slice),
+        unitScale(_unitScale), chromaQpAdj(_chromaQpAdj), sps(_sps), pps(_pps),
+        picHeader(_picHeader), pcv(_pcv), treeType(_treeType),
+        modeType(_modeType), cus(_cus), pus(_pus), tus(_tus), prevPLT(_prevPLT),
+        m_isTuEnc(isTuEnc), m_numCUs(numCUs), m_numPUs(numPUs),
+        m_numTUs(numTUs), m_cuCache(cuCache), m_puCache(puCache),
+        m_tuCache(tuCache) {
+    picture->cs = this;
+    slice->setPic(picture);
+    slice->setSPS(sps);
+    slice->setPPS(pps);
+    slice->setPicHeader(picHeader);
+
+    ::std::for_each(cus.begin(), cus.end(), [this](CodingUnit *cu) {
+      cu->cs = this;
+      cu->slice = slice;
+    });
+
+    ::std::for_each(pus.begin(), pus.end(),
+                    [this](PredictionUnit *pu) { pu->cs = this; });
+
+    ::std::for_each(tus.begin(), tus.end(),
+                    [this](TransformUnit *tu) { tu->cs = this; });
+
+    copy_array(cuIdx, m_cuIdx);
+    copy_array(puIdx, m_puIdx);
+    copy_array(tuIdx, m_tuIdx);
+
+    copy_array(coeffs, m_coeffs);
+    copy_array(pcmbuf, m_pcmbuf);
+    copy_array(runType, m_runType);
+    copy_array(offsets, m_offsets);
+  }
+
+  ~CodingStructure() {
+    delete picture;
+    delete parent;
+
+    ::std::for_each(cus.begin(), cus.end(), [](CodingUnit *cu) { delete cu; });
+
+    ::std::for_each(pus.begin(), pus.end(),
+                    [](PredictionUnit *pu) { delete pu; });
+
+    ::std::for_each(tus.begin(), tus.end(),
+                    [](TransformUnit *tu) { delete tu; });
+  }
 
   const CodingUnit *getCU(const Position &pos, const ChannelType _chType) const;
   const PredictionUnit *getPU(const Position &pos,
@@ -86,31 +152,30 @@ public:
   ::std::vector<TransformUnit *> tus;
 
   PLTBuf prevPLT;
-  void reorderPrevPLT(PLTBuf &prevPLT, uint8_t curPLTSize[MAX_NUM_CHANNEL_TYPE],
-                      Pel curPLT[MAX_NUM_COMPONENT][MAXPLTSIZE],
-                      bool reuseflag[MAX_NUM_CHANNEL_TYPE][MAXPLTPREDSIZE],
+  void reorderPrevPLT(PLTBuf &prevPLT,
+                      ::std::array<uint8_t, MAX_NUM_CHANNEL_TYPE> &curPLTSize,
+                      CurPLT31 &curPLT, ReuseFlag &reuseflag,
                       uint32_t compBegin, uint32_t numComp, bool jointPLT);
 
-private:
   // needed for TU encoding
   bool m_isTuEnc;
 
-  unsigned *m_cuIdx[MAX_NUM_CHANNEL_TYPE];
-  unsigned *m_puIdx[MAX_NUM_CHANNEL_TYPE];
-  unsigned *m_tuIdx[MAX_NUM_CHANNEL_TYPE];
+  ::std::array<unsigned *, MAX_NUM_CHANNEL_TYPE> m_cuIdx;
+  ::std::array<unsigned *, MAX_NUM_CHANNEL_TYPE> m_puIdx;
+  ::std::array<unsigned *, MAX_NUM_CHANNEL_TYPE> m_tuIdx;
 
   unsigned m_numCUs;
   unsigned m_numPUs;
   unsigned m_numTUs;
 
-  CUCache &m_cuCache;
-  PUCache &m_puCache;
-  TUCache &m_tuCache;
+  CUCache m_cuCache;
+  PUCache m_puCache;
+  TUCache m_tuCache;
 
-  TCoeff *m_coeffs[MAX_NUM_COMPONENT];
-  Pel *m_pcmbuf[MAX_NUM_COMPONENT];
-  bool *m_runType[MAX_NUM_CHANNEL_TYPE];
-  int m_offsets[MAX_NUM_COMPONENT];
+  ::std::array<TCoeff *, MAX_NUM_COMPONENT> m_coeffs;
+  ::std::array<Pel *, MAX_NUM_COMPONENT> m_pcmbuf;
+  ::std::array<bool *, MAX_NUM_CHANNEL_TYPE> m_runType;
+  ::std::array<int, MAX_NUM_COMPONENT> m_offsets;
 };
 
 static inline uint32_t getNumberValidTBlocks(const PreCalcValues &pcv) {

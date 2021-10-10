@@ -1,15 +1,15 @@
-#ifndef __SLICE__
-#define __SLICE__
+#ifndef ENTROPY_CODEC_SLICE
+#define ENTROPY_CODEC_SLICE
 
 #include <cstring>
 #include <list>
 #include <map>
 #include <unordered_map>
 #include <vector>
+#include <algorithm>
 
 #include "alf_parameters.hpp"
 #include "picture.hpp"
-#include "unit.hpp"
 
 namespace EntropyCoding {
 
@@ -40,6 +40,16 @@ private:
   bool m_rrcRiceExtensionEnableFlag;
 
 public:
+  SPSRExt(const bool extendedPrecisionProcessingFlag,
+          const bool tsrcRicePresentFlag,
+          const bool persistentRiceAdaptationEnabledFlag,
+          const bool rrcRiceExtensionEnableFlag)
+      : m_extendedPrecisionProcessingFlag(extendedPrecisionProcessingFlag),
+        m_tsrcRicePresentFlag(tsrcRicePresentFlag),
+        m_persistentRiceAdaptationEnabledFlag(
+            persistentRiceAdaptationEnabledFlag),
+        m_rrcRiceExtensionEnableFlag(rrcRiceExtensionEnableFlag) {}
+
   bool getExtendedPrecisionProcessingFlag() const {
     return m_extendedPrecisionProcessingFlag;
   }
@@ -77,7 +87,7 @@ private:
   // Parameter
   BitDepths m_bitDepths;
   bool m_entropyCodingSyncEnabledFlag; //!< Flag for enabling WPP
-  int m_qpBDOffset[MAX_NUM_CHANNEL_TYPE];
+  ::std::array<int, MAX_NUM_CHANNEL_TYPE> m_qpBDOffset;
   uint32_t m_log2MaxTbSize;
 
   bool m_saoEnabledFlag;
@@ -106,6 +116,46 @@ private:
   uint32_t m_maxNumGeoCand;
 
 public:
+  SPS(const bool affineAmvrEnabledFlag, const bool MMVD, const bool SBT,
+      const bool ISP, const ChromaFormat chromaFormatIdc,
+      const int log2MinCodingBlockSize, const unsigned CTUSize,
+      const uint32_t uiMaxCUWidth, const bool transformSkipEnabledFlag,
+      const int log2MaxTransformSkipBlockSize, const bool BDPCMEnabledFlag,
+      const bool JointCbCrEnabledFlag, const BitDepths &bitDepths,
+      const bool entropyCodingSyncEnabledFlag, const int *qpBDOffset,
+      const uint32_t log2MaxTbSize, const bool saoEnabledFlag,
+      const SPSRExt &spsRangeExtension, const bool alfEnabledFlag,
+      const bool ccalfEnabledFlag, const unsigned IBCFlag,
+      const bool useColorTrans, const unsigned PLTMode,
+      const bool AMVREnabledFlag, const bool LMChroma, const bool MTS,
+      const bool IntraMTS, const bool InterMTS, const bool LFNST,
+      const bool Affine, const bool AffineType, const bool bcw, const bool ciip,
+      const bool Geo, const bool MRL, const bool MIP,
+      const uint32_t maxNumMergeCand, const uint32_t maxNumIBCMergeCand,
+      const uint32_t maxNumGeoCand)
+      : m_affineAmvrEnabledFlag(affineAmvrEnabledFlag), m_MMVD(MMVD),
+        m_SBT(SBT), m_ISP(ISP), m_chromaFormatIdc(chromaFormatIdc),
+        m_log2MinCodingBlockSize(log2MinCodingBlockSize), m_CTUSize(CTUSize),
+        m_uiMaxCUWidth(uiMaxCUWidth),
+        m_transformSkipEnabledFlag(transformSkipEnabledFlag),
+        m_log2MaxTransformSkipBlockSize(log2MaxTransformSkipBlockSize),
+        m_BDPCMEnabledFlag(BDPCMEnabledFlag),
+        m_JointCbCrEnabledFlag(JointCbCrEnabledFlag), m_bitDepths(bitDepths),
+        m_entropyCodingSyncEnabledFlag(entropyCodingSyncEnabledFlag),
+        m_log2MaxTbSize(log2MaxTbSize), m_saoEnabledFlag(saoEnabledFlag),
+        m_spsRangeExtension(spsRangeExtension),
+        m_alfEnabledFlag(alfEnabledFlag), m_ccalfEnabledFlag(ccalfEnabledFlag),
+        m_IBCFlag(IBCFlag), m_useColorTrans(useColorTrans), m_PLTMode(PLTMode),
+        m_AMVREnabledFlag(AMVREnabledFlag), m_LMChroma(LMChroma), m_MTS(MTS),
+        m_IntraMTS(IntraMTS), m_InterMTS(InterMTS), m_LFNST(LFNST),
+        m_Affine(Affine), m_AffineType(AffineType), m_bcw(bcw), m_ciip(ciip),
+        m_Geo(Geo), m_MRL(MRL), m_MIP(MIP), m_maxNumMergeCand(maxNumMergeCand),
+        m_maxNumIBCMergeCand(maxNumIBCMergeCand),
+        m_maxNumGeoCand(maxNumGeoCand) {
+    ::std::copy(qpBDOffset, qpBDOffset + MAX_NUM_CHANNEL_TYPE,
+                m_qpBDOffset.begin());
+  }
+
   ChromaFormat getChromaFormatIdc() const { return m_chromaFormatIdc; }
   int getLog2MinCodingBlockSize() const { return m_log2MinCodingBlockSize; }
   unsigned getCTUSize() const { return m_CTUSize; }
@@ -118,6 +168,7 @@ public:
   }
   bool getBDPCMEnabledFlag() const { return m_BDPCMEnabledFlag; }
   uint32_t getMaxTbSize() const { return 1 << m_log2MaxTbSize; }
+  uint32_t getLog2MaxTbSize() const {return m_log2MaxTbSize; }
   // Bit-depth
   int getBitDepth(ChannelType type) const { return m_bitDepths.recon[type]; }
   const BitDepths &getBitDepths() const { return m_bitDepths; }
@@ -198,6 +249,19 @@ private:
   uint32_t m_picHeightInLumaSamples;
 
 public:
+  PPS(const bool useDQP, const int chromaQpOffsetListLen, const uint8_t ctuSize,
+      const uint32_t numTileCols, const ::std::vector<uint32_t> &tileColBd,
+      const ::std::vector<uint32_t> &ctuToTileCol,
+      const ::std::vector<uint32_t> &ctuToTileRow,
+      const bool cabacInitPresentFlag, const uint32_t picWidthInLumaSamples,
+      const uint32_t picHeightInLumaSamples)
+      : m_useDQP(useDQP), m_chromaQpOffsetListLen(chromaQpOffsetListLen),
+        m_ctuSize(ctuSize), m_numTileCols(numTileCols), m_tileColBd(tileColBd),
+        m_ctuToTileCol(ctuToTileCol), m_ctuToTileRow(ctuToTileRow),
+        m_cabacInitPresentFlag(cabacInitPresentFlag),
+        m_picWidthInLumaSamples(picWidthInLumaSamples),
+        m_picHeightInLumaSamples(picHeightInLumaSamples) {}
+
   bool getUseDQP() const { return m_useDQP; }
   int getChromaQpOffsetListLen() const { return m_chromaQpOffsetListLen; }
   uint32_t getNumTileColumns() const { return m_numTileCols; }
@@ -234,7 +298,11 @@ private:
   AlfParam m_alfAPSParam;
 
 public:
+  APS() {}
+  APS(const AlfParam &alfAPSParam) : m_alfAPSParam(alfAPSParam) {}
+
   AlfParam &getAlfAPSParam() { return m_alfAPSParam; }
+  const AlfParam &getAlfAPSParam() const {return m_alfAPSParam; }
 };
 
 struct WPScalingParam {
@@ -277,13 +345,35 @@ private:
   bool m_mvdL1ZeroFlag;                   //!< L1 MVD set to zero flag
   uint32_t
       m_maxNumAffineMergeCand; //!< max number of sub-block merge candidates
-  unsigned m_minQT[3]; //!< minimum quad-tree size  0: I slice luma; 1: P/B
+  ::std::array<unsigned, 3> m_minQT; //!< minimum quad-tree size  0: I slice luma; 1: P/B
                        //!< slice; 2: I slice chroma
-  unsigned m_maxMTTHierarchyDepth[3]; //!< maximum MTT depth
-  unsigned m_maxBTSize[3];            //!< maximum BT size
-  unsigned m_maxTTSize[3];            //!< maximum TT size
+  ::std::array<unsigned, 3> m_maxMTTHierarchyDepth; //!< maximum MTT depth
+  ::std::array<unsigned, 3> m_maxBTSize;            //!< maximum BT size
+  ::std::array<unsigned, 3> m_maxTTSize;            //!< maximum TT size
 
 public:
+  PicHeader(const bool splitConsOverrideFlag,
+            const uint32_t cuQpDeltaSubdivIntra,
+            const uint32_t cuQpDeltaSubdivInter,
+            const uint32_t cuChromaQpOffsetSubdivIntra,
+            const uint32_t cuChromaQpOffsetSubdivInter,
+            const bool mvdL1ZeroFlag, const uint32_t maxNumAffineMergeCand,
+            const unsigned *minQT, const unsigned *maxMTTHierarchyDepth,
+            const unsigned *maxBTSize, const unsigned *maxTTSize)
+      : m_splitConsOverrideFlag(splitConsOverrideFlag),
+        m_cuQpDeltaSubdivIntra(cuQpDeltaSubdivIntra),
+        m_cuQpDeltaSubdivInter(cuQpDeltaSubdivInter),
+        m_cuChromaQpOffsetSubdivIntra(cuChromaQpOffsetSubdivIntra),
+        m_cuChromaQpOffsetSubdivInter(cuChromaQpOffsetSubdivInter),
+        m_mvdL1ZeroFlag(mvdL1ZeroFlag),
+        m_maxNumAffineMergeCand(maxNumAffineMergeCand) {
+    ::std::copy(minQT, minQT + 3, m_minQT.begin());
+    ::std::copy(maxMTTHierarchyDepth, maxMTTHierarchyDepth + 3,
+                m_maxMTTHierarchyDepth.begin());
+    ::std::copy(maxBTSize, maxBTSize + 3, m_maxBTSize.begin());
+    ::std::copy(maxTTSize, maxTTSize + 3, m_maxTTSize.begin());
+  }
+
   bool getSplitConsOverrideFlag() const { return m_splitConsOverrideFlag; }
   uint32_t getCuQpDeltaSubdivIntra() const { return m_cuQpDeltaSubdivIntra; }
   uint32_t getCuQpDeltaSubdivInter() const { return m_cuQpDeltaSubdivInter; }
@@ -302,6 +392,7 @@ public:
                ? (chType == CHANNEL_TYPE_LUMA ? m_minQT[0] : m_minQT[2])
                : m_minQT[1];
   }
+  const ::std::array<unsigned, 3> &getMinQt() const {return m_minQT; }
   unsigned
   getMaxMTTHierarchyDepth(SliceType slicetype,
                           ChannelType chType = CHANNEL_TYPE_LUMA) const {
@@ -310,26 +401,34 @@ public:
                                               : m_maxMTTHierarchyDepth[2])
                : m_maxMTTHierarchyDepth[1];
   }
+  const ::std::array<unsigned, 3> &getMaxMTTHierarchyDepth() const {return m_maxMTTHierarchyDepth;}
   unsigned getMaxBTSize(SliceType slicetype,
                         ChannelType chType = CHANNEL_TYPE_LUMA) const {
     return slicetype == I_SLICE
                ? (chType == CHANNEL_TYPE_LUMA ? m_maxBTSize[0] : m_maxBTSize[2])
                : m_maxBTSize[1];
   }
+  const ::std::array<unsigned, 3> &getMaxBTSize() const {return m_maxBTSize;}
   unsigned getMaxTTSize(SliceType slicetype,
                         ChannelType chType = CHANNEL_TYPE_LUMA) const {
     return slicetype == I_SLICE
                ? (chType == CHANNEL_TYPE_LUMA ? m_maxTTSize[0] : m_maxTTSize[2])
                : m_maxTTSize[1];
   }
+  const ::std::array<unsigned, 3> &getMaxTTSize() const {return m_maxTTSize;}
 };
+
+typedef ::std::array<
+    ::std::array<::std::array<WPScalingParam, MAX_NUM_COMPONENT>, MAX_NUM_REF>,
+    NUM_REF_PIC_LIST_01>
+    WeightPredTable;
 
 /// slice header class
 class Slice {
 
 private:
   //  Bitstream writing
-  bool m_saoEnabledFlag[MAX_NUM_CHANNEL_TYPE];
+  ::std::array<bool, MAX_NUM_CHANNEL_TYPE>  m_saoEnabledFlag;
   SliceType m_eSliceType;
   int m_iSliceQp;
   bool m_ChromaQpAdjEnabled;
@@ -337,13 +436,12 @@ private:
   int m_riceBaseLevelValue;         //< baseLevel value for abs_remainder
   bool m_signDataHidingEnabledFlag; //!< sign data hiding enabled flag
   bool m_tsResidualCodingDisabledFlag;
-  int m_aiNumRefIdx[NUM_REF_PIC_LIST_01]; //  for multiple reference of current
+  ::std::array<int, NUM_REF_PIC_LIST_01> m_aiNumRefIdx; //  for multiple reference of current
                                           //  slice
 
   bool m_bCheckLDC;
-
   bool m_biDirPred;
-  int m_symRefIdx[2];
+  ::std::array<int, 2> m_symRefIdx;
 
   // access channel
   const SPS *m_pcSPS;
@@ -351,29 +449,76 @@ private:
   Picture *m_pcPic;
   const PicHeader *m_pcPicHeader; //!< pointer to picture header structure
   uint32_t m_independentSliceIdx;
-  WPScalingParam
-      m_weightPredTable[NUM_REF_PIC_LIST_01][MAX_NUM_REF]
-                       [MAX_NUM_COMPONENT]; // [REF_PIC_LIST_0 or
-                                            // REF_PIC_LIST_1][refIdx][0:Y,
-                                            // 1:U, 2:V]
+  WeightPredTable m_weightPredTable; // [REF_PIC_LIST_0 or
+                                     // REF_PIC_LIST_1][refIdx][0:Y,
+                                     // 1:U, 2:V]
 
   bool m_cabacInitFlag;
 
   SliceType
       m_encCABACTableIdx; // Used to transmit table selection across slices.
-  APS *m_alfApss[ALF_CTB_MAX_NUM_APS];
-  bool m_alfEnabledFlag[MAX_NUM_COMPONENT];
+  ::std::array<APS*, ALF_CTB_MAX_NUM_APS> m_alfApss;
+  ::std::array<bool, MAX_NUM_COMPONENT> m_alfEnabledFlag;
   int m_numAlfApsIdsLuma;
   int m_alfApsIdChroma;
   int m_tsrc_index;
-  unsigned m_riceBit[8];
+  ::std::array<unsigned, 8> m_riceBit;
 
 public:
-  const PicHeader *getPicHeader() const { return m_pcPicHeader; }
-  const SPS *getSPS() const { return m_pcSPS; }
-  const PPS *getPPS() const { return m_pcPPS; }
+  Slice(const bool *saoEnabledFlag, const SliceType eSliceType,
+        const int iSliceQp, const bool ChromaQpAdjEnabled,
+        const bool depQuantEnabledFlag, const int riceBaseLevelValue,
+        const bool signDataHidingEnabledFlag,
+        const bool tsResidualCodingDisabledFlag, const int *aiNumRefIdx,
+        const bool bCheckLDC, const bool biDirPred, const int *symRefIdx,
+        const uint32_t independentSliceIdx,
+        const WeightPredTable &weightPredTable, const bool cabacInitFlag,
+        const SliceType encCABACTableIdx,
+        const ::std::array<APS *, ALF_CTB_MAX_NUM_APS> &alfApss,
+        const bool *alfEnabledFlag, const int numAlfApsIdsLuma,
+        const int alfApsIdChroma, const int tsrc_index, const unsigned *riceBit)
+      : m_eSliceType(eSliceType), m_iSliceQp(iSliceQp),
+        m_ChromaQpAdjEnabled(ChromaQpAdjEnabled),
+        m_depQuantEnabledFlag(depQuantEnabledFlag),
+        m_riceBaseLevelValue(riceBaseLevelValue),
+        m_signDataHidingEnabledFlag(signDataHidingEnabledFlag),
+        m_tsResidualCodingDisabledFlag(tsResidualCodingDisabledFlag),
+        m_bCheckLDC(bCheckLDC), m_biDirPred(biDirPred),
+        m_independentSliceIdx(independentSliceIdx),
+        m_weightPredTable(weightPredTable), m_cabacInitFlag(cabacInitFlag),
+        m_encCABACTableIdx(encCABACTableIdx), m_alfApss(alfApss),
+        m_numAlfApsIdsLuma(numAlfApsIdsLuma), m_alfApsIdChroma(alfApsIdChroma),
+        m_tsrc_index(tsrc_index) {
+    ::std::copy(saoEnabledFlag, saoEnabledFlag + m_saoEnabledFlag.size(),
+                m_saoEnabledFlag.begin());
+    ::std::copy(aiNumRefIdx, aiNumRefIdx + m_aiNumRefIdx.size(),
+                m_aiNumRefIdx.begin());
+    ::std::copy(symRefIdx, symRefIdx + m_symRefIdx.size(), m_symRefIdx.begin());
+    ::std::copy(alfEnabledFlag, alfEnabledFlag + m_alfEnabledFlag.size(),
+                m_alfEnabledFlag.begin());
+    ::std::copy(riceBit, riceBit + m_riceBit.size(), m_riceBit.begin());
+  }
 
-  APS **getAlfAPSs() { return m_alfApss; }
+  ~Slice() {
+    delete m_pcSPS;
+    delete m_pcPPS;
+    delete m_pcPicHeader;
+    ::std::for_each(m_alfApss.begin(), m_alfApss.end(), [](APS *aps) {
+      delete aps;
+    });
+  }
+
+  const PicHeader *getPicHeader() const { return m_pcPicHeader; }
+  void setPicHeader(const PicHeader *picHeader) { m_pcPicHeader = picHeader; }
+  const SPS *getSPS() const { return m_pcSPS; }
+  void setSPS(const SPS *sps) { m_pcSPS = sps; }
+  const PPS *getPPS() const { return m_pcPPS; }
+  void setPPS(const PPS *pps) { m_pcPPS = pps; }
+
+  APS **getAlfAPSs() { return m_alfApss.data(); }
+  const ::std::array<APS *, ALF_CTB_MAX_NUM_APS> &getAlfAPSs() const {
+    return m_alfApss;
+  }
   bool getSaoEnabledFlag(ChannelType chType) const {
     return m_saoEnabledFlag[chType];
   }
@@ -384,6 +529,7 @@ public:
   int getNumRefIdx(RefPicList e) const { return m_aiNumRefIdx[e]; }
   Picture *getPic() { return m_pcPic; }
   const Picture *getPic() const { return m_pcPic; }
+  void setPic(Picture *pic) { m_pcPic = pic; }
   bool getCheckLDC() const { return m_bCheckLDC; }
   bool getDepQuantEnabledFlag() const { return m_depQuantEnabledFlag; }
   int getRiceBaseLevel() const { return m_riceBaseLevelValue; }
@@ -409,6 +555,7 @@ public:
                            : m_pcPicHeader->getCuChromaQpOffsetSubdivInter();
   }
   uint32_t getIndependentSliceIdx() const { return m_independentSliceIdx; }
+  const WeightPredTable &getWeightPredTable() const {return m_weightPredTable; }
   WPScalingParam *getWpScaling(const RefPicList refPicList, const int refIdx);
   const WPScalingParam *getWpScaling(const RefPicList refPicList,
                                      const int refIdx) const;
@@ -447,17 +594,40 @@ public:
   const bool noChroma2x2;
   const bool ISingleTree;
 
-  // private:
-  const unsigned maxBtDepth[3];
-  const unsigned minBtSize[3];
-  const unsigned maxBtSize[3];
-  const unsigned minTtSize[3];
-  const unsigned maxTtSize[3];
-  const unsigned minQtSize[3];
+private:
+  ::std::array<unsigned, 3> maxBtDepth;
+  ::std::array<unsigned, 3> minBtSize;
+  ::std::array<unsigned, 3> maxBtSize;
+  ::std::array<unsigned, 3> minTtSize;
+  ::std::array<unsigned, 3> maxTtSize;
+  ::std::array<unsigned, 3> minQtSize;
 
   unsigned getValIdx(const Slice &slice, const ChannelType chType) const;
 
-  // public:
+public:
+  PreCalcValues(const ChromaFormat _chrFormat, const bool _multiBlock422,
+                const unsigned _maxCUWidth, const unsigned _maxCUHeight,
+                const unsigned _maxCUWidthMask, const unsigned _maxCUHeightMask,
+                const unsigned _maxCUWidthLog2, const unsigned _maxCUHeightLog2,
+                const unsigned _widthInCtus, const unsigned _sizeInCtus,
+                const bool _noChroma2x2, const bool _ISingleTree,
+                const unsigned *_maxBtDepth, const unsigned *_minBtSize,
+                const unsigned *_maxBtSize, const unsigned *_minTtSize,
+                const unsigned *_maxTtSize, const unsigned *_minQtSize)
+      : chrFormat(_chrFormat), multiBlock422(_multiBlock422),
+        maxCUWidth(_maxCUWidth), maxCUHeight(_maxCUHeight),
+        maxCUWidthMask(_maxCUWidthMask), maxCUHeightMask(_maxCUHeightMask),
+        maxCUWidthLog2(_maxCUWidthLog2), maxCUHeightLog2(_maxCUHeightLog2),
+        widthInCtus(_widthInCtus), sizeInCtus(_sizeInCtus),
+        noChroma2x2(_noChroma2x2), ISingleTree(_ISingleTree) {
+    copy_array(_maxBtDepth, maxBtDepth);
+    copy_array(_minBtSize, minBtSize);
+    copy_array(_maxBtSize, maxBtSize);
+    copy_array(_minTtSize, minTtSize);
+    copy_array(_maxTtSize, maxTtSize);
+    copy_array(_minQtSize, minQtSize);
+  }
+
   unsigned getMaxBtDepth(const Slice &slice, const ChannelType chType) const;
   unsigned getMinBtSize(const Slice &slice, const ChannelType chType) const;
   unsigned getMaxBtSize(const Slice &slice, const ChannelType chType) const;
@@ -467,4 +637,4 @@ public:
 };
 } // namespace EntropyCoding
 
-#endif // __SLICE__
+#endif // ENTROPY_CODEC_SLICE

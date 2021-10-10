@@ -1,4 +1,5 @@
 #include "unit_tools.hpp"
+#include "coding_structure.hpp"
 
 namespace EntropyCoding {
 
@@ -395,7 +396,7 @@ bool CU::hasSubCUNonZeroAffineMVd(const CodingUnit &cu) {
     return false;
   }
 
-  for (const auto &pu : CU::traversePUs(cu)) {
+  for (const auto &pu : EntropyCoding::CU::traversePUs(cu)) {
     if ((!pu.mergeFlag) && (!cu.skip)) {
       if (pu.interDir != 2 /* PRED_L1 */) {
         for (int i = 0; i < (cu.affineType == AFFINEMODEL_6PARAM ? 3 : 2);
@@ -449,6 +450,36 @@ int PU::getLMSymbolList(const PredictionUnit &pu, int *modeList) {
   modeList[idx++] = MDLM_L_IDX;
   modeList[idx++] = MDLM_T_IDX;
   return idx;
+}
+
+uint32_t PU::getCoLocatedIntraLumaMode(const PredictionUnit &pu)
+{
+  return PU::getIntraDirLuma(PU::getCoLocatedLumaPU(pu));
+}
+
+void PU::getIntraChromaCandModes(const PredictionUnit &pu,
+                                 unsigned modeList[NUM_CHROMA_MODE]) {
+  modeList[0] = PLANAR_IDX;
+  modeList[1] = VER_IDX;
+  modeList[2] = HOR_IDX;
+  modeList[3] = DC_IDX;
+  modeList[4] = LM_CHROMA_IDX;
+  modeList[5] = MDLM_L_IDX;
+  modeList[6] = MDLM_T_IDX;
+  modeList[7] = DM_CHROMA_IDX;
+
+  // If Direct Mode is MIP, mode cannot be already in the list.
+  if (isDMChromaMIP(pu)) {
+    return;
+  }
+
+  const uint32_t lumaMode = getCoLocatedIntraLumaMode(pu);
+  for (int i = 0; i < 4; i++) {
+    if (lumaMode == modeList[i]) {
+      modeList[i] = VDIA_IDX;
+      break;
+    }
+  }
 }
 
 int PU::getIntraMPMs(const PredictionUnit &pu, unsigned *mpm,
@@ -649,6 +680,13 @@ bool TU::getPrevTuCbfAtDepth(const TransformUnit &currentTu,
   const TransformUnit *prevTU = getPrevTU(currentTu, compID);
   return (prevTU != nullptr) ? TU::getCbfAtDepth(*prevTU, compID, trDepth)
                              : false;
+}
+
+bool allowLfnstWithMip(const Size &block) {
+  if (block.width >= 16 && block.height >= 16) {
+    return true;
+  }
+  return false;
 }
 
 int getNumModesMip(const Size &block) {

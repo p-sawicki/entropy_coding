@@ -63,7 +63,7 @@ const WPScalingParam *Slice::getWpScaling(const RefPicList refPicList,
   if (refIdx < 0) {
     return nullptr;
   } else {
-    return m_weightPredTable[refPicList][refIdx];
+    return m_weightPredTable[refPicList][refIdx].data();
   }
 }
 
@@ -73,7 +73,7 @@ WPScalingParam *Slice::getWpScaling(const RefPicList refPicList,
   if (refIdx < 0) {
     return nullptr;
   } else {
-    return m_weightPredTable[refPicList][refIdx];
+    return m_weightPredTable[refPicList][refIdx].data();
   }
 }
 } // namespace EntropyCoding

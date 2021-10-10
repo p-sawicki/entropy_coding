@@ -1,27 +1,47 @@
 #include "unit_partitioner.hpp"
 #include "unit_tools.hpp"
+#include "coding_structure.hpp"
 
-namespace EntropyCoding {
+static const int g_maxRtGridSize = 3;
 
-PartLevel::PartLevel()
+static const int g_zScanToX[1 << (g_maxRtGridSize << 1)] = {
+    0, 1, 0, 1, 2, 3, 2, 3, 0, 1, 0, 1, 2, 3, 2, 3, 4, 5, 4, 5, 6, 7,
+    6, 7, 4, 5, 4, 5, 6, 7, 6, 7, 0, 1, 0, 1, 2, 3, 2, 3, 0, 1, 0, 1,
+    2, 3, 2, 3, 4, 5, 4, 5, 6, 7, 6, 7, 4, 5, 4, 5, 6, 7, 6, 7,
+};
+static const int g_zScanToY[1 << (g_maxRtGridSize << 1)] = {
+    0, 0, 1, 1, 0, 0, 1, 1, 2, 2, 3, 3, 2, 2, 3, 3, 0, 0, 1, 1, 0, 0,
+    1, 1, 2, 2, 3, 3, 2, 2, 3, 3, 4, 4, 5, 5, 4, 4, 5, 5, 6, 6, 7, 7,
+    6, 6, 7, 7, 4, 4, 5, 5, 4, 4, 5, 5, 6, 6, 7, 7, 6, 6, 7, 7,
+};
+static const int g_rsScanToZ[1 << (g_maxRtGridSize << 1)] = {
+    0,  1,  4,  5,  16, 17, 20, 21, 2,  3,  6,  7,  18, 19, 22, 23,
+    8,  9,  12, 13, 24, 25, 28, 29, 10, 11, 14, 15, 26, 27, 30, 31,
+    32, 33, 36, 37, 48, 49, 52, 53, 34, 35, 38, 39, 50, 51, 54, 55,
+    40, 41, 44, 45, 56, 57, 60, 61, 42, 43, 46, 47, 58, 59, 62, 63,
+};
+
+EntropyCoding::PartLevel::PartLevel()
     : split(CU_DONT_SPLIT), parts(), idx(0u), checkdIfImplicit(false),
       isImplicit(false), implicitSplit(CU_DONT_SPLIT),
       firstSubPartSplit(CU_DONT_SPLIT), canQtSplit(true), qgEnable(true),
       qgChromaEnable(true), modeType(MODE_TYPE_ALL) {}
 
-PartLevel::PartLevel(const PartSplit _split, const Partitioning &_parts)
+EntropyCoding::PartLevel::PartLevel(const PartSplit _split,
+                                    const Partitioning &_parts)
     : split(_split), parts(_parts), idx(0u), checkdIfImplicit(false),
       isImplicit(false), implicitSplit(CU_DONT_SPLIT),
       firstSubPartSplit(CU_DONT_SPLIT), canQtSplit(true), qgEnable(true),
       qgChromaEnable(true), modeType(MODE_TYPE_ALL) {}
 
-PartLevel::PartLevel(const PartSplit _split, Partitioning &&_parts)
+EntropyCoding::PartLevel::PartLevel(const PartSplit _split,
+                                    Partitioning &&_parts)
     : split(_split), parts(::std::forward<Partitioning>(_parts)), idx(0u),
       checkdIfImplicit(false), isImplicit(false), implicitSplit(CU_DONT_SPLIT),
       firstSubPartSplit(CU_DONT_SPLIT), canQtSplit(true), qgEnable(true),
       qgChromaEnable(true), modeType(MODE_TYPE_ALL) {}
 
-SplitSeries Partitioner::getSplitSeries() const {
+EntropyCoding::SplitSeries EntropyCoding::Partitioner::getSplitSeries() const {
   SplitSeries splitSeries = 0;
   SplitSeries depth = 0;
 
@@ -38,7 +58,8 @@ SplitSeries Partitioner::getSplitSeries() const {
   return splitSeries;
 }
 
-ModeTypeSeries Partitioner::getModeTypeSeries() const {
+EntropyCoding::ModeTypeSeries
+EntropyCoding::Partitioner::getModeTypeSeries() const {
   ModeTypeSeries modeTypeSeries = 0;
   int depth = 0;
 
@@ -54,7 +75,7 @@ ModeTypeSeries Partitioner::getModeTypeSeries() const {
   return modeTypeSeries;
 }
 
-void Partitioner::setCUData(CodingUnit &cu) {
+void EntropyCoding::Partitioner::setCUData(CodingUnit &cu) {
   cu.depth = currDepth;
   cu.btDepth = currBtDepth;
   cu.mtDepth = currMtDepth;
@@ -63,12 +84,13 @@ void Partitioner::setCUData(CodingUnit &cu) {
   cu.modeTypeSeries = getModeTypeSeries();
 }
 
-bool Partitioner::isSepTree(const CodingStructure &cs) {
+bool EntropyCoding::Partitioner::isSepTree(const CodingStructure &cs) {
   return treeType != TREE_D || CS::isDualITree(cs);
 }
 
-void QTBTPartitioner::initCtu(const UnitArea &ctuArea,
-                              const ChannelType _chType, const Slice &slice) {
+void EntropyCoding::QTBTPartitioner::initCtu(const UnitArea &ctuArea,
+                                             const ChannelType _chType,
+                                             const Slice &slice) {
 #if _DEBUG
   m_currArea = ctuArea;
 #endif
@@ -90,8 +112,8 @@ void QTBTPartitioner::initCtu(const UnitArea &ctuArea,
   modeType = MODE_TYPE_ALL;
 }
 
-void QTBTPartitioner::splitCurrArea(const PartSplit split,
-                                    const CodingStructure &cs) {
+void EntropyCoding::QTBTPartitioner::splitCurrArea(const PartSplit split,
+                                                   const CodingStructure &cs) {
   CHECKD(!canSplit(split, cs), "Trying to apply a prohibited split!");
 
   bool isImplicit = isSplitImplicit(split, cs);
@@ -185,7 +207,7 @@ void QTBTPartitioner::splitCurrArea(const PartSplit split,
     currQgChromaPos = currArea().chromaPos();
 }
 
-void QTBTPartitioner::exitCurrSplit() {
+void EntropyCoding::QTBTPartitioner::exitCurrSplit() {
   PartSplit currSplit = m_partStack.back().split;
   unsigned currIdx = m_partStack.back().idx;
 
@@ -240,8 +262,8 @@ void QTBTPartitioner::exitCurrSplit() {
   }
 }
 
-bool QTBTPartitioner::nextPart(const CodingStructure &cs,
-                               bool autoPop /*= false*/) {
+bool EntropyCoding::QTBTPartitioner::nextPart(const CodingStructure &cs,
+                                              bool autoPop /*= false*/) {
   const Position &prevPos = currArea().blocks[chType].pos();
 
   unsigned currIdx = ++m_partStack.back().idx;
@@ -283,9 +305,10 @@ bool QTBTPartitioner::nextPart(const CodingStructure &cs,
   }
 }
 
-void QTBTPartitioner::canSplit(const CodingStructure &cs, bool &canNo,
-                               bool &canQt, bool &canBh, bool &canBv,
-                               bool &canTh, bool &canTv) {
+void EntropyCoding::QTBTPartitioner::canSplit(const CodingStructure &cs,
+                                              bool &canNo, bool &canQt,
+                                              bool &canBh, bool &canBv,
+                                              bool &canTh, bool &canTv) {
   const PartSplit implicitSplit = m_partStack.back().checkdIfImplicit
                                       ? m_partStack.back().implicitSplit
                                       : getImplicitSplit(cs);
@@ -395,8 +418,8 @@ void QTBTPartitioner::canSplit(const CodingStructure &cs, bool &canNo,
     canTv = canTh = false;
 }
 
-bool QTBTPartitioner::canSplit(const PartSplit split,
-                               const CodingStructure &cs) {
+bool EntropyCoding::QTBTPartitioner::canSplit(const PartSplit split,
+                                              const CodingStructure &cs) {
   const CompArea area = currArea().Y();
   const unsigned maxTrSize = cs.sps->getMaxTbSize();
 
@@ -447,12 +470,13 @@ bool QTBTPartitioner::canSplit(const PartSplit split,
   return true;
 }
 
-bool QTBTPartitioner::isSplitImplicit(const PartSplit split,
-                                      const CodingStructure &cs) {
+bool EntropyCoding::QTBTPartitioner::isSplitImplicit(
+    const PartSplit split, const CodingStructure &cs) {
   return split == getImplicitSplit(cs);
 }
 
-PartSplit QTBTPartitioner::getImplicitSplit(const CodingStructure &cs) {
+EntropyCoding::PartSplit
+EntropyCoding::QTBTPartitioner::getImplicitSplit(const CodingStructure &cs) {
   if (m_partStack.back().checkdIfImplicit) {
     return m_partStack.back().implicitSplit;
   }
@@ -499,8 +523,8 @@ PartSplit QTBTPartitioner::getImplicitSplit(const CodingStructure &cs) {
   return split;
 }
 
-void TUIntraSubPartitioner::splitCurrArea(const PartSplit split,
-                                          const CodingStructure &cs) {
+void EntropyCoding::TUIntraSubPartitioner::splitCurrArea(
+    const PartSplit split, const CodingStructure &cs) {
   switch (split) {
   case TU_1D_HORZ_SPLIT:
   case TU_1D_VERT_SPLIT: {
@@ -531,7 +555,7 @@ void TUIntraSubPartitioner::splitCurrArea(const PartSplit split,
 #endif
 }
 
-void TUIntraSubPartitioner::exitCurrSplit() {
+void EntropyCoding::TUIntraSubPartitioner::exitCurrSplit() {
   PartSplit currSplit = m_partStack.back().split;
 
   m_partStack.pop_back();
@@ -550,8 +574,8 @@ void TUIntraSubPartitioner::exitCurrSplit() {
         "Unknown 1D partition split type!");
 }
 
-bool TUIntraSubPartitioner::nextPart(const CodingStructure &cs,
-                                     bool autoPop /*= false*/) {
+bool EntropyCoding::TUIntraSubPartitioner::nextPart(const CodingStructure &cs,
+                                                    bool autoPop /*= false*/) {
   unsigned currIdx = ++m_partStack.back().idx;
 
   m_partStack.back().checkdIfImplicit = false;
@@ -569,8 +593,8 @@ bool TUIntraSubPartitioner::nextPart(const CodingStructure &cs,
   }
 }
 
-bool TUIntraSubPartitioner::canSplit(const PartSplit split,
-                                     const CodingStructure &cs) {
+bool EntropyCoding::TUIntraSubPartitioner::canSplit(const PartSplit split,
+                                                    const CodingStructure &cs) {
   // const PartSplit implicitSplit = getImplicitSplit(cs);
   const UnitArea &area = currArea();
 
@@ -591,7 +615,7 @@ bool TUIntraSubPartitioner::canSplit(const PartSplit split,
   }
 }
 
-Partitioning PartitionerImpl::getCUSubPartitions(
+EntropyCoding::Partitioning EntropyCoding::PartitionerImpl::getCUSubPartitions(
     const UnitArea &cuArea, const CodingStructure &cs,
     const PartSplit _splitType /*= CU_QUAD_SPLIT*/) {
   const PartSplit splitType = _splitType;
@@ -767,8 +791,9 @@ Partitioning PartitionerImpl::getCUSubPartitions(
   }
 }
 
-Partitioning PartitionerImpl::getMaxTuTiling(const UnitArea &cuArea,
-                                             const CodingStructure &cs) {
+EntropyCoding::Partitioning
+EntropyCoding::PartitionerImpl::getMaxTuTiling(const UnitArea &cuArea,
+                                               const CodingStructure &cs) {
   static_assert(MAX_LOG2_DIFF_CU_TR_SIZE <= g_maxRtGridSize,
                 "Z-scan tables are only provided for MAX_LOG2_DIFF_CU_TR_SIZE "
                 "for up to 3 (8x8 tiling)!");
@@ -810,10 +835,9 @@ Partitioning PartitionerImpl::getMaxTuTiling(const UnitArea &cuArea,
   return ret;
 }
 
-void PartitionerImpl::getTUIntraSubPartitions(Partitioning &sub,
-                                              const UnitArea &tuArea,
-                                              const CodingStructure &cs,
-                                              const PartSplit splitType) {
+void EntropyCoding::PartitionerImpl::getTUIntraSubPartitions(
+    Partitioning &sub, const UnitArea &tuArea, const CodingStructure &cs,
+    const PartSplit splitType) {
   uint32_t nPartitions;
   uint32_t splitDimensionSize = CU::getISPSplitDim(
       tuArea.lumaSize().width, tuArea.lumaSize().height, splitType);
@@ -870,9 +894,10 @@ void PartitionerImpl::getTUIntraSubPartitions(Partitioning &sub,
   }
 }
 
-Partitioning PartitionerImpl::getSbtTuTiling(const UnitArea &cuArea,
-                                             const CodingStructure &cs,
-                                             const PartSplit splitType) {
+EntropyCoding::Partitioning
+EntropyCoding::PartitionerImpl::getSbtTuTiling(const UnitArea &cuArea,
+                                               const CodingStructure &cs,
+                                               const PartSplit splitType) {
   Partitioning ret;
   int numTiles = 2;
   int widthFactor, heightFactor, xOffsetFactor,
@@ -931,23 +956,3 @@ Partitioning PartitionerImpl::getSbtTuTiling(const UnitArea &cuArea,
 
   return ret;
 }
-
-static const int g_maxRtGridSize = 3;
-
-static const int g_zScanToX[1 << (g_maxRtGridSize << 1)] = {
-    0, 1, 0, 1, 2, 3, 2, 3, 0, 1, 0, 1, 2, 3, 2, 3, 4, 5, 4, 5, 6, 7,
-    6, 7, 4, 5, 4, 5, 6, 7, 6, 7, 0, 1, 0, 1, 2, 3, 2, 3, 0, 1, 0, 1,
-    2, 3, 2, 3, 4, 5, 4, 5, 6, 7, 6, 7, 4, 5, 4, 5, 6, 7, 6, 7,
-};
-static const int g_zScanToY[1 << (g_maxRtGridSize << 1)] = {
-    0, 0, 1, 1, 0, 0, 1, 1, 2, 2, 3, 3, 2, 2, 3, 3, 0, 0, 1, 1, 0, 0,
-    1, 1, 2, 2, 3, 3, 2, 2, 3, 3, 4, 4, 5, 5, 4, 4, 5, 5, 6, 6, 7, 7,
-    6, 6, 7, 7, 4, 4, 5, 5, 4, 4, 5, 5, 6, 6, 7, 7, 6, 6, 7, 7,
-};
-static const int g_rsScanToZ[1 << (g_maxRtGridSize << 1)] = {
-    0,  1,  4,  5,  16, 17, 20, 21, 2,  3,  6,  7,  18, 19, 22, 23,
-    8,  9,  12, 13, 24, 25, 28, 29, 10, 11, 14, 15, 26, 27, 30, 31,
-    32, 33, 36, 37, 48, 49, 52, 53, 34, 35, 38, 39, 50, 51, 54, 55,
-    40, 41, 44, 45, 56, 57, 60, 61, 42, 43, 46, 47, 58, 59, 62, 63,
-};
-} // namespace EntropyCoding

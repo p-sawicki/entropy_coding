@@ -1,5 +1,5 @@
-#ifndef __MV__
-#define __MV__
+#ifndef ENTROPY_CODEC_MV
+#define ENTROPY_CODEC_MV
 
 #include "common_def.hpp"
 
@@ -98,4 +98,4 @@ public:
 }; // END CLASS DEFINITION MV
 } // namespace EntropyCoding
 
-#endif // __MV__
+#endif // ENTROPY_CODEC_MV

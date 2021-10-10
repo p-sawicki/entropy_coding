@@ -1,5 +1,5 @@
-#ifndef __CABACWRITER__
-#define __CABACWRITER__
+#ifndef ENTROPY_CODEC_CABAC_WRITER
+#define ENTROPY_CODEC_CABAC_WRITER
 
 #include "arith_codec.hpp"
 #include "bit_stream.hpp"
@@ -11,18 +11,15 @@
 
 namespace EntropyCoding {
 
-class EncCu;
 class CABACWriter {
 public:
   CABACWriter(BinEncIf &binEncoder) : m_BinEncoder(binEncoder), m_Bitstream(0) {
     m_TestCtx = m_BinEncoder.getCtx();
-    m_EncCu = NULL;
   }
   virtual ~CABACWriter() {}
 
 public:
   void initCtxModels(const Slice &slice);
-  void setEncCu(EncCu *pcEncCu) { m_EncCu = pcEncCu; }
   SliceType getCtxInitId(const Slice &slice);
   void initBitstream(OutputBitstream *bitstream) {
     m_Bitstream = bitstream;
@@ -144,23 +141,23 @@ public:
                                   bool ricePresentFlag);
   void joint_cb_cr(const TransformUnit &tu, const int cbfMask);
 
-  void codeAlfCtuEnableFlags(CodingStructure &cs, ChannelType channel,
+  void codeAlfCtuEnableFlags(const CodingStructure &cs, ChannelType channel,
                              AlfParam *alfParam);
-  void codeAlfCtuEnableFlags(CodingStructure &cs, ComponentID compID,
+  void codeAlfCtuEnableFlags(const CodingStructure &cs, ComponentID compID,
                              AlfParam *alfParam);
-  void codeAlfCtuEnableFlag(CodingStructure &cs, uint32_t ctuRsAddr,
+  void codeAlfCtuEnableFlag(const CodingStructure &cs, uint32_t ctuRsAddr,
                             const int compIdx, AlfParam *alfParam);
-  void codeAlfCtuFilterIndex(CodingStructure &cs, uint32_t ctuRsAddr,
+  void codeAlfCtuFilterIndex(const CodingStructure &cs, uint32_t ctuRsAddr,
                              bool alfEnableLuma);
 
-  void codeAlfCtuAlternatives(CodingStructure &cs, ChannelType channel,
+  void codeAlfCtuAlternatives(const CodingStructure &cs, ChannelType channel,
                               AlfParam *alfParam);
-  void codeAlfCtuAlternatives(CodingStructure &cs, ComponentID compID,
+  void codeAlfCtuAlternatives(const CodingStructure &cs, ComponentID compID,
                               AlfParam *alfParam);
-  void codeAlfCtuAlternative(CodingStructure &cs, uint32_t ctuRsAddr,
+  void codeAlfCtuAlternative(const CodingStructure &cs, uint32_t ctuRsAddr,
                              const int compIdx,
                              const AlfParam *alfParam = NULL);
-  void codeCcAlfFilterControlIdc(uint8_t idcVal, CodingStructure &cs,
+  void codeCcAlfFilterControlIdc(uint8_t idcVal, const CodingStructure &cs,
                                  const ComponentID compID, const int curIdx,
                                  const uint8_t *filterControlIdc,
                                  Position lumaPos, const int filterCount);
@@ -185,7 +182,6 @@ private:
   BinEncIf &m_BinEncoder;
   OutputBitstream *m_Bitstream;
   Ctx m_TestCtx;
-  EncCu *m_EncCu;
   ScanElement *m_scanOrder;
 };
 
@@ -212,4 +208,4 @@ private:
 };
 } // namespace EntropyCoding
 
-#endif //__CABACWRITER__
+#endif //ENTROPY_CODEC_CABAC_WRITER

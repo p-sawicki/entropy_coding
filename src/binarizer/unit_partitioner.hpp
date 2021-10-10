@@ -1,5 +1,5 @@
-#ifndef __UNITPARTITIONER__
-#define __UNITPARTITIONER__
+#ifndef ENTROPY_CODEC_UNIT_PARTITIONER
+#define ENTROPY_CODEC_UNIT_PARTITIONER
 
 #include <vector>
 
@@ -55,6 +55,17 @@ struct PartLevel {
   PartLevel();
   PartLevel(const PartSplit _split, const Partitioning &_parts);
   PartLevel(const PartSplit _split, Partitioning &&_parts);
+  PartLevel(const PartSplit _split, const Partitioning &_parts,
+            const unsigned _idx, const bool _checkdIfImplicit,
+            const bool _isImplicit, const PartSplit _implicitSplit,
+            const PartSplit _firstSubPartSplit, const bool _canQtSplit,
+            const bool _qgEnable, const bool _qgChromaEnable,
+            const int _modeType)
+      : split(_split), parts(_parts), idx(_idx),
+        checkdIfImplicit(_checkdIfImplicit), isImplicit(_isImplicit),
+        implicitSplit(_implicitSplit), firstSubPartSplit(_firstSubPartSplit),
+        canQtSplit(_canQtSplit), qgEnable(_qgEnable),
+        qgChromaEnable(_qgChromaEnable), modeType(_modeType) {}
 };
 
 // set depending on max QT / BT possibilities
@@ -81,6 +92,22 @@ public:
   ChannelType chType;
   TreeType treeType;
   ModeType modeType;
+
+  Partitioner() {}
+  Partitioner(const PartitioningStack &partStack, const unsigned _currDepth,
+              const unsigned _currQtDepth, const unsigned _currTrDepth,
+              const unsigned _currBtDepth, const unsigned _currMtDepth,
+              const unsigned _currSubdiv, const Position &_currQgPos,
+              const Position &_currQgChromaPos,
+              const unsigned _currImplicitBtDepth, const ChannelType _chType,
+              const TreeType _treeType, const ModeType _modeType)
+      : m_partStack(partStack), currDepth(_currDepth),
+        currQtDepth(_currQtDepth), currTrDepth(_currTrDepth),
+        currBtDepth(_currBtDepth), currMtDepth(_currMtDepth),
+        currSubdiv(_currSubdiv), currQgPos(_currQgPos),
+        currQgChromaPos(_currQgChromaPos),
+        currImplicitBtDepth(_currImplicitBtDepth), chType(_chType),
+        treeType(_treeType), modeType(_modeType) {}
 
   virtual ~Partitioner() {}
 
@@ -121,6 +148,21 @@ public:
 
 class QTBTPartitioner : public Partitioner {
 public:
+  QTBTPartitioner() : Partitioner() {}
+  
+  QTBTPartitioner(const PartitioningStack &partStack, const unsigned _currDepth,
+                  const unsigned _currQtDepth, const unsigned _currTrDepth,
+                  const unsigned _currBtDepth, const unsigned _currMtDepth,
+                  const unsigned _currSubdiv, const Position &_currQgPos,
+                  const Position &_currQgChromaPos,
+                  const unsigned _currImplicitBtDepth,
+                  const ChannelType _chType, const TreeType _treeType,
+                  const ModeType _modeType)
+      : Partitioner(partStack, _currDepth, _currQtDepth, _currTrDepth,
+                    _currBtDepth, _currMtDepth, _currSubdiv, _currQgPos,
+                    _currQgChromaPos, _currImplicitBtDepth, _chType, _treeType,
+                    _modeType) {}
+
   void initCtu(const UnitArea &ctuArea, const ChannelType _chType,
                const Slice &slice);
   void splitCurrArea(const PartSplit split, const CodingStructure &cs);
@@ -152,6 +194,20 @@ public:
     treeType = _initialState.treeType;
     modeType = _initialState.modeType;
   }
+  TUIntraSubPartitioner(const PartitioningStack &partStack,
+                        const unsigned _currDepth, const unsigned _currQtDepth,
+                        const unsigned _currTrDepth,
+                        const unsigned _currBtDepth,
+                        const unsigned _currMtDepth, const unsigned _currSubdiv,
+                        const Position &_currQgPos,
+                        const Position &_currQgChromaPos,
+                        const unsigned _currImplicitBtDepth,
+                        const ChannelType _chType, const TreeType _treeType,
+                        const ModeType _modeType)
+      : Partitioner(partStack, _currDepth, _currQtDepth, _currTrDepth,
+                    _currBtDepth, _currMtDepth, _currSubdiv, _currQgPos,
+                    _currQgChromaPos, _currImplicitBtDepth, _chType, _treeType,
+                    _modeType) {}
 
   void initCtu(const UnitArea &ctuArea, const ChannelType chType,
                const Slice &slice){}; // not needed

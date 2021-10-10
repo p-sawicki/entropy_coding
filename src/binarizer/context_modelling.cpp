@@ -1,5 +1,6 @@
 #include "context_modelling.hpp"
 #include "unit_tools.hpp"
+#include "coding_structure.hpp"
 
 namespace EntropyCoding {
 
@@ -18,15 +19,16 @@ CoeffCodingContext::CoeffCodingContext(const TransformUnit &tu,
       m_log2BlockWidth((unsigned)floorLog2(m_width)),
       m_log2BlockHeight((unsigned)floorLog2(m_height)),
       m_maxNumCoeff(m_width * m_height), m_signHiding(signHide)
-#if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
-      ,
-      m_extendedPrecision(tu.cs->sps->getSpsRangeExtension()
-                              .getExtendedPrecisionProcessingFlag())
-#else
-//,
-// m_extendedPrecision(tu.cs->sps->getSpsRangeExtension().getExtendedPrecisionProcessingFlag()
-//&& tu.cs->sps->getBitDepth( m_chType ) > 10)
-#endif
+// #if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
+//       ,
+//       m_extendedPrecision(tu.cs->sps->getSpsRangeExtension()
+//                               .getExtendedPrecisionProcessingFlag())
+// #else
+//       ,
+//       m_extendedPrecision(tu.cs->sps->getSpsRangeExtension()
+//                               .getExtendedPrecisionProcessingFlag() &&
+//                           tu.cs->sps->getBitDepth(m_chType) > 10)
+// #endif
       ,
       m_maxLog2TrDynamicRange(tu.cs->sps->getMaxLog2TrDynamicRange(m_chType)),
       m_scanType(SCAN_DIAG),

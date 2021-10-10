@@ -1,5 +1,5 @@
-#ifndef BIT_STREAM_HPP
-#define BIT_STREAM_HPP
+#ifndef ENTROPY_CODEC_BIT_STREAM
+#define ENTROPY_CODEC_BIT_STREAM
 
 #include <stdint.h>
 #include <stdio.h>
@@ -21,14 +21,14 @@ class OutputBitstream {
    *  - &fifo.front() to get a pointer to the data array.
    *    NB, this pointer is only valid until the next push_back()/clear()
    */
-  ::std::vector<uint8_t> m_fifo;
+  ::std::vector<uint8_t> &m_fifo;
 
   uint32_t m_num_held_bits; /// number of bits not flushed to bytestream.
   uint8_t m_held_bits;      /// the bits held and not flushed to bytestream.
                             /// this value is always msb-aligned, bigendian.
 public:
   // create / destroy
-  OutputBitstream();
+  OutputBitstream(::std::vector<uint8_t> &fifo);
   ~OutputBitstream();
 
   // interface for encoding
@@ -118,6 +118,14 @@ public:
   InputBitstream();
   virtual ~InputBitstream() = default;
   InputBitstream(const InputBitstream &src);
+  InputBitstream(const ::std::vector<uint8_t> &fifo,
+                 const ::std::vector<uint32_t> &emulationPreventionByteLocation,
+                 const uint32_t fifo_idx, const uint32_t num_held_bits,
+                 const uint8_t held_bits, const uint32_t numBitsRead)
+      : m_fifo(fifo),
+        m_emulationPreventionByteLocation(emulationPreventionByteLocation),
+        m_fifo_idx(fifo_idx), m_num_held_bits(num_held_bits),
+        m_held_bits(held_bits), m_numBitsRead(numBitsRead) {}
 
   void resetToStart();
 
@@ -160,4 +168,4 @@ public:
 };
 } // namespace EntropyCoding
 
-#endif // BIT_STREAM_HPP
+#endif // ENTROPY_CODEC_BIT_STREAM

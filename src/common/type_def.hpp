@@ -1,9 +1,10 @@
-#ifndef TYPE_DEF_HPP
-#define TYPE_DEF_HPP
+#ifndef ENTROPY_CODEC_TYPE_DEF
+#define ENTROPY_CODEC_TYPE_DEF
 
 #include <sstream>
 #include <stdexcept>
 #include <vector>
+#include <array>
 
 namespace EntropyCoding {
 
@@ -191,7 +192,7 @@ enum SAOModeNewTypes {
 
   NUM_SAO_NEW_TYPES
 };
-#define NUM_SAO_EO_TYPES_LOG2 2
+constexpr int NUM_SAO_EO_TYPES_LOG2 = 2;
 
 enum SAOEOClasses {
   SAO_CLASS_EO_FULL_VALLEY = 0,
@@ -201,8 +202,8 @@ enum SAOEOClasses {
   SAO_CLASS_EO_FULL_PEAK = 4,
   NUM_SAO_EO_CLASSES,
 };
-#define NUM_SAO_BO_CLASSES_LOG2 5
-#define NUM_SAO_BO_CLASSES (1 << NUM_SAO_BO_CLASSES_LOG2)
+constexpr int NUM_SAO_BO_CLASSES_LOG2 = 5;
+constexpr int NUM_SAO_BO_CLASSES = (1 << NUM_SAO_BO_CLASSES_LOG2);
 
 enum ISPType {
   NOT_INTRA_SUBPARTITIONS = 0,
@@ -243,9 +244,8 @@ enum MTSIdx {
 };
 
 template <typename T> class dynamic_cache {
-  std::vector<T *> m_cache;
-
 public:
+  std::vector<T *> m_cache;
   ~dynamic_cache() { deleteEntries(); }
 
   void deleteEntries() {
@@ -439,7 +439,7 @@ enum Name {
 } // namespace Profile
 
 struct BitDepths {
-  int recon[MAX_NUM_CHANNEL_TYPE]; ///< the bit depth as indicated in the SPS
+  ::std::array<int, MAX_NUM_CHANNEL_TYPE> recon; ///< the bit depth as indicated in the SPS
 };
 
 #if RExt__HIGH_BIT_DEPTH_SUPPORT
@@ -650,55 +650,25 @@ enum SAOMode // mode
   SAO_MODE_MERGE,
   NUM_SAO_MODES };
 
-#define MAX_NUM_SAO_CLASSES                                                    \
-  32 //(NUM_SAO_EO_GROUPS >
-     // NUM_SAO_BO_GROUPS)?NUM_SAO_EO_GROUPS:NUM_SAO_BO_GROUPS
+constexpr int MAX_NUM_SAO_CLASSES =
+    32; //(NUM_SAO_EO_GROUPS >
+        // NUM_SAO_BO_GROUPS)?NUM_SAO_EO_GROUPS:NUM_SAO_BO_GROUPS
 
 struct SAOOffset {
   SAOMode modeIdc; // NEW, MERGE, OFF
   int typeIdc; // union of SAOModeMergeTypes and SAOModeNewTypes, depending on
                // modeIdc.
   int typeAuxInfo; // BO: starting band index
-  int offset[MAX_NUM_SAO_CLASSES];
-
-  SAOOffset();
-  ~SAOOffset();
-  void reset();
-
-  const SAOOffset &operator=(const SAOOffset &src);
+  ::std::array<int, MAX_NUM_SAO_CLASSES> offset;
 };
 
 struct SAOBlkParam {
-
-  SAOBlkParam();
-  ~SAOBlkParam();
-  void reset();
-  const SAOBlkParam &operator=(const SAOBlkParam &src);
   SAOOffset &operator[](int compIdx) { return offsetParam[compIdx]; }
   const SAOOffset &operator[](int compIdx) const {
     return offsetParam[compIdx];
   }
 
-private:
-  SAOOffset offsetParam[MAX_NUM_COMPONENT];
-};
-
-struct PictureHash {
-  ::std::vector<uint8_t> hash;
-
-  bool operator==(const PictureHash &other) const {
-    if (other.hash.size() != hash.size()) {
-      return false;
-    }
-    for (uint32_t i = 0; i < uint32_t(hash.size()); i++) {
-      if (other.hash[i] != hash[i]) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  bool operator!=(const PictureHash &other) const { return !(*this == other); }
+  ::std::array<SAOOffset, MAX_NUM_COMPONENT> offsetParam;
 };
 
 class ChromaCbfs {
@@ -725,4 +695,4 @@ public:
 };
 } // namespace EntropyCoding
 
-#endif // TYPE_DEF_HPP
+#endif // ENTROPY_CODEC_TYPE_DEF

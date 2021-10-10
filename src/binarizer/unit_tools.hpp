@@ -1,9 +1,14 @@
-#ifndef __UNIT_TOOLS__
-#define __UNIT_TOOLS__
+#ifndef ENTROPY_CODEC_UNIT_TOOLS
+#define ENTROPY_CODEC_UNIT_TOOLS
 
-#include "coding_structure.hpp"
+#include "common_def.hpp"
+#include "unit.hpp"
+#include "unit_partitioner.hpp"
 
 namespace EntropyCoding {
+
+class PreCalcValues;
+class CodingStructure;
 
 uint32_t getCtuAddr(const Position &pos, const PreCalcValues &pcv);
 
@@ -63,6 +68,7 @@ uint8_t targetSbtAllowed(uint8_t idx, uint8_t sbtAllowed);
 } // namespace CU
 
 namespace PU {
+uint32_t getCoLocatedIntraLumaMode(const PredictionUnit &pu);
 int getLMSymbolList(const PredictionUnit &pu, int *modeList);
 int getIntraMPMs(const PredictionUnit &pu, unsigned *mpm,
                  const ChannelType &channelType = CHANNEL_TYPE_LUMA);
@@ -92,12 +98,7 @@ bool getPrevTuCbfAtDepth(const TransformUnit &tu, const ComponentID compID,
                          const int trDepth);
 } // namespace TU
 
-bool allowLfnstWithMip(const Size &block) {
-  if (block.width >= 16 && block.height >= 16) {
-    return true;
-  }
-  return false;
-}
+bool allowLfnstWithMip(const Size &block);
 
 int getNumModesMip(const Size &block);
 int getMipSizeId(const Size &block);

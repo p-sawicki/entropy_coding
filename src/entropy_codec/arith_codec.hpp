@@ -1,5 +1,5 @@
-#ifndef ARITH_CODEC_HPP
-#define ARITH_CODEC_HPP
+#ifndef ENTROPY_CODEC_ARITH_CODEC
+#define ENTROPY_CODEC_ARITH_CODEC
 
 #include "bit_stream.hpp"
 #include "contexts.hpp"
@@ -272,4 +272,4 @@ private:
 typedef TBinDecoder<BinProbModel_Std> BinDecoder_Std;
 } // namespace EntropyCoding
 
-#endif // ARITH_CODEC_HPP
+#endif // ENTROPY_CODEC_ARITH_CODEC

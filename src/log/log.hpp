@@ -1,5 +1,5 @@
-#ifndef ENTROPY_CODER_LIB_LOG_H
-#define ENTROPY_CODER_LIB_LOG_H
+#ifndef ENTROPY_CODEC_LOG
+#define ENTROPY_CODEC_LOG
 
 #include <fstream>
 
@@ -169,4 +169,4 @@ public:
 extern Logger binLogger, bitLogger;
 } // namespace EntropyCoding
 
-#endif // ENTROPY_CODER_LIB_LOG_H
+#endif // ENTROPY_CODEC_LOG

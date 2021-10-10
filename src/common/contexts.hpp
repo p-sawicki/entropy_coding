@@ -1,5 +1,5 @@
-#ifndef CONTEXTS_HPP
-#define CONTEXTS_HPP
+#ifndef ENTROPY_CODEC_CONTEXTS
+#define ENTROPY_CODEC_CONTEXTS
 
 #include <cstdint>
 #include <initializer_list>
@@ -155,6 +155,9 @@ public:
 class BinProbModel_Std : public BinProbModelBase {
 public:
   BinProbModel_Std();
+  BinProbModel_Std(const uint16_t state0, const uint16_t state1,
+                   const uint8_t rate)
+      : m_state{state0, state1}, m_rate(rate) {}
   ~BinProbModel_Std() = default;
 
 public:
@@ -178,6 +181,10 @@ public:
 public:
   uint64_t estFracExcessBits(const BinProbModel_Std &r) const;
 
+  uint16_t getState0() const { return m_state[0]; }
+  uint16_t getState1() const { return m_state[1]; }
+  uint8_t getRate() const { return m_rate; }
+
 private:
   uint16_t m_state[2];
   uint8_t m_rate;
@@ -193,6 +200,8 @@ public:
   CtxStore();
   CtxStore(bool dummy);
   CtxStore(const CtxStore<BinProbModel> &ctxStore);
+  CtxStore(const ::std::vector<BinProbModel> &ctxBuffer)
+      : m_CtxBuffer(ctxBuffer), m_Ctx(m_CtxBuffer.data()) {}
 
 public:
   void copyFrom(const CtxStore<BinProbModel> &src);
@@ -207,6 +216,9 @@ public:
   uint32_t estFracBits(unsigned bin, unsigned ctxId) const;
 
   BinFracBits getFracBitsArray(unsigned ctxId) const;
+  const ::std::vector<BinProbModel> &getCtxBuffer() const {
+    return m_CtxBuffer;
+  }
 
 private:
   void checkInit();
@@ -235,6 +247,8 @@ public:
   Ctx();
   Ctx(const BinProbModel_Std *dummy);
   Ctx(const Ctx &ctx);
+  Ctx(const BPMType bpmType, const CtxStore<BinProbModel_Std> &ctxStore)
+      : m_BPMType(bpmType), m_CtxStore_Std(ctxStore) {}
 
 public:
   const Ctx &operator=(const Ctx &ctx);
@@ -283,4 +297,4 @@ protected:
 };
 } // namespace EntropyCoding
 
-#endif // CONTEXTS_HPP
+#endif // ENTROPY_CODEC_CONTEXTS

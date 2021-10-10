@@ -1,10 +1,11 @@
-#ifndef __CABACREADER__
-#define __CABACREADER__
+#ifndef ENTROPY_CODEC_CABAC_READER
+#define ENTROPY_CODEC_CABAC_READER
 
 #include "arith_codec.hpp"
 #include "context_modelling.hpp"
 #include "mv.hpp"
 #include "unit_partitioner.hpp"
+#include "coding_structure.hpp"
 
 namespace EntropyCoding {
 

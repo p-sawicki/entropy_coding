@@ -1,12 +1,11 @@
-#ifndef __CONTEXTMODELLING__
-#define __CONTEXTMODELLING__
+#ifndef ENTROPY_CODEC_CONTEXT_MODELLING
+#define ENTROPY_CODEC_CONTEXT_MODELLING
 
 #include <bitset>
 
 #include "contexts.hpp"
 #include "rom.hpp"
 #include "slice.hpp"
-#include "unit.hpp"
 #include "unit_partitioner.hpp"
 
 namespace EntropyCoding {
@@ -62,6 +61,7 @@ public:
     return ts ? m_sigGroupCtxIdTS : m_sigGroupCtxId;
   }
   bool bdpcm() const { return m_bdpcm; }
+  unsigned height() const { return m_height; }
 
   void decimateNumCtxBins(int n) { m_remainingContextBins -= n; }
 
@@ -461,6 +461,18 @@ public:
     violatesMtsCoeffConstraint = false;
     mtsLastScanPos = false;
   }
+
+  CUCtx(const bool _isDQPCoded, const bool _isChromaQpAdjCoded,
+        const bool _qgStart, const bool _lfnstLastScanPost, const int8_t _qp,
+        const bool *_violatesLfnstConstrained,
+        const bool _violatesMtsCoeffConstraint, const bool _mtsLastScanPos)
+      : isDQPCoded(_isDQPCoded), isChromaQpAdjCoded(_isChromaQpAdjCoded),
+        qgStart(_qgStart), lfnstLastScanPos(_lfnstLastScanPost), qp(_qp),
+        violatesMtsCoeffConstraint(_violatesMtsCoeffConstraint),
+        mtsLastScanPos(_mtsLastScanPos) {
+    copy_array(_violatesLfnstConstrained, violatesLfnstConstrained);
+  }
+
   ~CUCtx() = default;
 
   bool isDQPCoded;
@@ -468,7 +480,7 @@ public:
   bool qgStart;
   bool lfnstLastScanPos;
   int8_t qp; // used as a previous(last) QP and for QP prediction
-  bool violatesLfnstConstrained[MAX_NUM_CHANNEL_TYPE];
+  ::std::array<bool, MAX_NUM_CHANNEL_TYPE> violatesLfnstConstrained;
   bool violatesMtsCoeffConstraint;
   bool mtsLastScanPos;
 };
@@ -490,4 +502,4 @@ unsigned CtxPltCopyFlag(const unsigned prevRunType, const unsigned dist);
 } // namespace DeriveCtx
 } // namespace EntropyCoding
 
-#endif // __CONTEXTMODELLING__
+#endif // ENTROPY_CODEC_CONTEXT_MODELLING

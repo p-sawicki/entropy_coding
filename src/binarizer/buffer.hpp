@@ -1,5 +1,7 @@
-#ifndef __BUFFER__
-#define __BUFFER__
+#ifndef ENTROPY_CODEC_BUFFER
+#define ENTROPY_CODEC_BUFFER
+
+#include <cstring>
 
 #include "common_def.hpp"
 
@@ -7,6 +9,7 @@ namespace EntropyCoding {
 
 template <typename T> struct AreaBuf : public Size {
   T *buf;
+  int stride;
 
   AreaBuf() : Size(), buf(NULL), stride(0) {}
   AreaBuf(T *_buf, const Size &size)
@@ -38,6 +41,52 @@ typedef AreaBuf<bool> PLTtypeBuf;
 typedef AreaBuf<const bool> CPLTtypeBuf;
 
 struct UnitArea;
+
+#define SIZE_AWARE_PER_EL_OP(OP, INC)                                          \
+  if ((width & 7) == 0) {                                                      \
+    for (int y = 0; y < height; y++) {                                         \
+      for (int x = 0; x < width; x += 8) {                                     \
+        OP(x + 0);                                                             \
+        OP(x + 1);                                                             \
+        OP(x + 2);                                                             \
+        OP(x + 3);                                                             \
+        OP(x + 4);                                                             \
+        OP(x + 5);                                                             \
+        OP(x + 6);                                                             \
+        OP(x + 7);                                                             \
+      }                                                                        \
+                                                                               \
+      INC;                                                                     \
+    }                                                                          \
+  } else if ((width & 3) == 0) {                                               \
+    for (int y = 0; y < height; y++) {                                         \
+      for (int x = 0; x < width; x += 4) {                                     \
+        OP(x + 0);                                                             \
+        OP(x + 1);                                                             \
+        OP(x + 2);                                                             \
+        OP(x + 3);                                                             \
+      }                                                                        \
+                                                                               \
+      INC;                                                                     \
+    }                                                                          \
+  } else if ((width & 1) == 0) {                                               \
+    for (int y = 0; y < height; y++) {                                         \
+      for (int x = 0; x < width; x += 2) {                                     \
+        OP(x + 0);                                                             \
+        OP(x + 1);                                                             \
+      }                                                                        \
+                                                                               \
+      INC;                                                                     \
+    }                                                                          \
+  } else {                                                                     \
+    for (int y = 0; y < height; y++) {                                         \
+      for (int x = 0; x < width; x++) {                                        \
+        OP(x);                                                                 \
+      }                                                                        \
+                                                                               \
+      INC;                                                                     \
+    }                                                                          \
+  }
 
 template <typename T> void AreaBuf<T>::fill(const T &val) {
   if (sizeof(T) == 1) {

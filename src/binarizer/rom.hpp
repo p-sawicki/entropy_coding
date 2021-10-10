@@ -1,6 +1,15 @@
+#ifndef ENTROPY_CODEC_ROM
+#define ENTROPY_CODEC_ROM
+
 #include "common_def.hpp"
 
 namespace EntropyCoding {
+
+struct ScanElement {
+  uint32_t idx;
+  uint16_t x;
+  uint16_t y;
+};
 
 // ====================================================================================================================
 // Scanning order & context mapping table
@@ -41,14 +50,10 @@ constexpr uint8_t g_tbMax[257] = {
     7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
     7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8};
 
-// flexible conversion from relative to absolute index
-struct ScanElement {
-  uint32_t idx;
-  uint16_t x;
-  uint16_t y;
-};
 
 extern uint32_t g_log2SbbSize[MAX_CU_DEPTH + 1][MAX_CU_DEPTH + 1][2];
 extern uint8_t g_paletteRunTopLut[5];
 extern uint8_t g_paletteRunLeftLut[5];
 } // namespace EntropyCoding
+
+#endif

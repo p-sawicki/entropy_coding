@@ -13,7 +13,7 @@ namespace EntropyCoding {
 // Constructor / destructor / create / destroy
 // ====================================================================================================================
 
-OutputBitstream::OutputBitstream() { clear(); }
+OutputBitstream::OutputBitstream(::std::vector<uint8_t> &fifo) : m_fifo(fifo) { clear(); }
 
 OutputBitstream::~OutputBitstream() {}
 

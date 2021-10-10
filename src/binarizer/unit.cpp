@@ -4,6 +4,7 @@
 #include "unit.hpp"
 #include "unit_partitioner.hpp"
 #include "unit_tools.hpp"
+#include "coding_structure.hpp"
 
 namespace EntropyCoding {
 
@@ -71,6 +72,9 @@ void CompArea::xRecalcLumaToChroma() {
 
 UnitArea::UnitArea(const ChromaFormat _chromaFormat)
     : chromaFormat(_chromaFormat) {}
+
+UnitArea::UnitArea(const ChromaFormat _chromaFormat, const UnitBlocksType &_blocks)
+    : chromaFormat(_chromaFormat), blocks(_blocks) {}
 
 UnitArea::UnitArea(const ChromaFormat _chromaFormat, const Area &_area)
     : chromaFormat(_chromaFormat),
@@ -198,11 +202,11 @@ void CodingUnit::initData() {
     lastPLTSize[idx] = 0;
     useEscape[idx] = false;
     useRotation[idx] = false;
-    memset(reuseflag[idx], false, MAXPLTPREDSIZE * sizeof(bool));
+    memset(reuseflag[idx].data(), false, MAXPLTPREDSIZE * sizeof(bool));
   }
 
   for (int idx = 0; idx < MAX_NUM_COMPONENT; idx++) {
-    memset(curPLT[idx], 0, MAXPLTSIZE * sizeof(Pel));
+    memset(curPLT[idx].data(), 0, MAXPLTSIZE * sizeof(Pel));
   }
 
   treeType = TREE_D;
@@ -411,10 +415,10 @@ void PredictionUnit::initData() {
     }
     for (uint32_t j = 0; j < 3; j++) {
       // mvAffi[i][j].setZero();
-#if GDR_ENABLED
-      mvAffiSolid[i][j] = true;
-      mvAffiValid[i][j] = true;
-#endif
+// #if GDR_ENABLED
+//       mvAffiSolid[i][j] = true;
+//       mvAffiValid[i][j] = true;
+// #endif
     }
   }
   ciipFlag = false;

@@ -1,5 +1,7 @@
-#ifndef COMMON_DEF_HPP
-#define COMMON_DEF_HPP
+#ifndef ENTROPY_CODEC_COMMON_DEF
+#define ENTROPY_CODEC_COMMON_DEF
+
+#include <limits>
 
 #include "type_def.hpp"
 
@@ -445,14 +447,6 @@ static const int MIN_TSRC_RICE = 1; ///< Minimum supported TSRC Rice parameter
 static const int MAX_CTI_LUT_SIZE =
     64; ///< Maximum colour transform LUT size for CTI SEI
 
-static const int MAX_BT_DEPTH = 4; ///<  <=7
-                                   // for P/B slice CTU config. para.
-static const int MAX_BT_DEPTH_INTER =
-    4; ///< <=7
-       // for I slice chroma CTB configuration para. (in luma samples)
-static const int MAX_BT_DEPTH_C = 0; ///< <=7
-static const int MIN_DUALTREE_CHROMA_WIDTH = 4;
-static const int MIN_DUALTREE_CHROMA_SIZE = 16;
 static const SplitSeries SPLIT_BITS = 5;
 static const SplitSeries SPLIT_DMULT = 5;
 static const SplitSeries SPLIT_MASK = 31; ///< = (1 << SPLIT_BITS) - 1
@@ -761,6 +755,11 @@ inline size_t rsAddr(const Position &pos, const Position &origin,
                      const uint32_t stride) {
   return stride * (pos.y - origin.y) + (pos.x - origin.x);
 }
+
+template <typename T1, typename T2, size_t N>
+inline T2* copy_array(const T1 *src, ::std::array<T2, N> &dest) {
+  return ::std::copy(src, src + dest.size(), dest.begin());
+}
 } // namespace EntropyCoding
 
-#endif // COMMON_DEF_HPP
+#endif // ENTROPY_CODEC_COMMON_DEF

@@ -1,5 +1,5 @@
-#ifndef __UNIT__
-#define __UNIT__
+#ifndef ENTROPY_CODEC_UNIT
+#define ENTROPY_CODEC_UNIT
 
 #include <assert.h>
 
@@ -8,14 +8,18 @@
 #include "mv.hpp"
 
 namespace EntropyCoding {
+typedef ::std::array<::std::array<Pel, MAXPLTSIZE>, MAX_NUM_COMPONENT> CurPLT31;
+typedef ::std::array<::std::array<Pel, MAXPLTPREDSIZE>, MAX_NUM_COMPONENT>
+    CurPLT63;
 
 // ---------------------------------------------------------------------------
 // tools
 // ---------------------------------------------------------------------------
 struct PLTBuf {
-  uint8_t curPLTSize[MAX_NUM_CHANNEL_TYPE];
-  Pel curPLT[MAX_NUM_COMPONENT][MAXPLTPREDSIZE];
+  ::std::array<uint8_t, MAX_NUM_CHANNEL_TYPE> curPLTSize;
+  CurPLT63 curPLT;
 };
+
 inline Position recalcPosition(const ChromaFormat _cf, const ComponentID srcCId,
                                const ComponentID dstCId, const Position &pos) {
   if (toChannelType(srcCId) == toChannelType(dstCId)) {
@@ -143,7 +147,8 @@ struct CompArea : public Area {
   }
 
 #if REUSE_CU_RESULTS_WITH_MULTIPLE_TUS
-  void resizeTo(const Size &newSize) { Size::resizeTo(newSize); }
+  // void resizeTo(const Size &newSize) { Size::resizeTo(newSize); }
+  void resizeTo(const Size &newSize) {}
 #endif
   void repositionTo(const Position &newPos) { Position::repositionTo(newPos); }
   void positionRelativeTo(const CompArea &origCompArea) {
@@ -171,6 +176,7 @@ struct UnitArea {
 
   UnitArea() : chromaFormat(NUM_CHROMA_FORMAT) {}
   UnitArea(const ChromaFormat _chromaFormat);
+  UnitArea(const ChromaFormat _chromaFormat, const UnitBlocksType &_blocks);
   UnitArea(const ChromaFormat _chromaFormat, const Area &area);
   UnitArea(const ChromaFormat _chromaFormat, const CompArea &blkY);
   UnitArea(const ChromaFormat _chromaFormat, CompArea &&blkY);
@@ -271,13 +277,14 @@ struct TransformUnit;
 struct PredictionUnit;
 class CodingStructure;
 
+typedef ::std::array<::std::array<bool, MAXPLTPREDSIZE>, MAX_NUM_CHANNEL_TYPE>
+    ReuseFlag;
+
 struct CodingUnit : public UnitArea {
   CodingStructure *cs;
   Slice *slice;
   ChannelType chType;
-
   PredMode predMode;
-
   uint8_t depth;   // number of all splits, applied with generalized splits
   uint8_t qtDepth; // number of applied quad-splits, before switching to the
                    // multi-type-tree (mtt)
@@ -313,13 +320,13 @@ struct CodingUnit : public UnitArea {
   // // needed for fast imv mode decisions
   uint8_t smvdMode;
   uint8_t ispMode;
-  bool useEscape[MAX_NUM_CHANNEL_TYPE];
-  bool useRotation[MAX_NUM_CHANNEL_TYPE];
-  bool reuseflag[MAX_NUM_CHANNEL_TYPE][MAXPLTPREDSIZE];
-  uint8_t lastPLTSize[MAX_NUM_CHANNEL_TYPE];
-  uint8_t reusePLTSize[MAX_NUM_CHANNEL_TYPE];
-  uint8_t curPLTSize[MAX_NUM_CHANNEL_TYPE];
-  Pel curPLT[MAX_NUM_COMPONENT][MAXPLTSIZE];
+  ::std::array<bool, MAX_NUM_CHANNEL_TYPE> useEscape;
+  ::std::array<bool, MAX_NUM_CHANNEL_TYPE> useRotation;
+  ReuseFlag reuseflag;
+  ::std::array<uint8_t, MAX_NUM_CHANNEL_TYPE> lastPLTSize;
+  ::std::array<uint8_t, MAX_NUM_CHANNEL_TYPE> reusePLTSize;
+  ::std::array<uint8_t, MAX_NUM_CHANNEL_TYPE> curPLTSize;
+  CurPLT31 curPLT;
 
   void initData();
 
@@ -331,6 +338,51 @@ struct CodingUnit : public UnitArea {
 
   TransformUnit *firstTU;
   TransformUnit *lastTU;
+
+  CodingUnit() {}
+
+  CodingUnit(const UnitArea &unitArea, const ChannelType _chType,
+             const PredMode _predMode, const uint8_t _depth,
+             const uint8_t _qtDepth, const uint8_t _btDepth,
+             const uint8_t _mtDepth, const uint8_t _chromaQpAdj,
+             const uint8_t _qp, const SplitSeries _splitSeries,
+             const TreeType _treeType, const ModeType _modeType,
+             const ModeTypeSeries _modeTypeSeries, const bool _skip,
+             const bool _mmvdSkip, const bool _affine, const int _affineType,
+             const bool _colorTransform, const bool _geoFlag,
+             const int _bdpcmMode, const int _bdpcmModeChroma,
+             const uint8_t _imv, const bool _rootCbf, const uint8_t _sbtInfo,
+             const uint32_t _tileIdx, const uint32_t _lfnstIdx,
+             const uint8_t _BcwIdx, const bool _mipFlag,
+             const uint8_t _smvdMode, const uint8_t _ispMode,
+             const bool *_useEscape, const bool *_useRotation,
+             const bool _reuseflag[][MAXPLTPREDSIZE],
+             const uint8_t *_lastPLTSize, const uint8_t *_reusePLTSize,
+             const uint8_t *_curPLTSize, const Pel _curPLT[][MAXPLTSIZE],
+             const unsigned _idx)
+      : UnitArea(unitArea), chType(_chType), predMode(_predMode), depth(_depth),
+        qtDepth(_qtDepth), btDepth(_btDepth), mtDepth(_mtDepth),
+        chromaQpAdj(_chromaQpAdj), qp(_qp), splitSeries(_splitSeries),
+        treeType(_treeType), modeType(_modeType),
+        modeTypeSeries(_modeTypeSeries), skip(_skip), mmvdSkip(_mmvdSkip),
+        affine(_affine), affineType(_affineType),
+        colorTransform(_colorTransform), geoFlag(_geoFlag),
+        bdpcmMode(_bdpcmMode), bdpcmModeChroma(_bdpcmModeChroma), imv(_imv),
+        rootCbf(_rootCbf), sbtInfo(_sbtInfo), tileIdx(_tileIdx),
+        lfnstIdx(_lfnstIdx), BcwIdx(_BcwIdx), mipFlag(_mipFlag),
+        smvdMode(_smvdMode), ispMode(_ispMode), idx(_idx) {
+    copy_array(_useEscape, useEscape);
+    copy_array(_useRotation, useRotation);
+    for (int i = 0; i < reuseflag.size(); ++i) {
+      copy_array(_reuseflag[i], reuseflag[i]);
+    }
+    copy_array(_lastPLTSize, lastPLTSize);
+    copy_array(_reusePLTSize, reusePLTSize);
+    copy_array(_curPLTSize, curPLTSize);
+    for (int i = 0; i < curPLT.size(); ++i) {
+      copy_array(_curPLT[i], curPLT[i]);
+    }
+  }
 
   const uint8_t getSbtIdx() const {
     assert(((sbtInfo >> 0) & 0xf) < NUMBER_SBT_IDX);
@@ -359,10 +411,19 @@ struct CodingUnit : public UnitArea {
 // ---------------------------------------------------------------------------
 
 struct IntraPredictionData {
-  uint32_t intraDir[MAX_NUM_CHANNEL_TYPE];
+  ::std::array<uint32_t, MAX_NUM_CHANNEL_TYPE> intraDir;
   bool mipTransposedFlag;
   int multiRefIdx;
+
+  IntraPredictionData() {}
+  IntraPredictionData(const uint32_t *_intraDir, const bool _mipTransposedFlag,
+                      const int _multiRefIdx)
+      : mipTransposedFlag(_mipTransposedFlag), multiRefIdx(_multiRefIdx) {
+    copy_array(_intraDir, intraDir);
+  }
 };
+
+typedef ::std::array<::std::array<Mv, 3>, NUM_REF_PIC_LIST_01> MvdAffi;
 
 struct InterPredictionData {
   bool mergeFlag;
@@ -374,13 +435,33 @@ struct InterPredictionData {
   bool mmvdMergeFlag;
   uint32_t mmvdMergeIdx;
   uint8_t interDir;
-  uint8_t mvpIdx[NUM_REF_PIC_LIST_01];
-  Mv mvd[NUM_REF_PIC_LIST_01];
-  Mv mv[NUM_REF_PIC_LIST_01];
-  int16_t refIdx[NUM_REF_PIC_LIST_01];
+  ::std::array<uint8_t, NUM_REF_PIC_LIST_01> mvpIdx;
+  ::std::array<Mv, NUM_REF_PIC_LIST_01> mvd;
+  ::std::array<Mv, NUM_REF_PIC_LIST_01> mv;
+  ::std::array<int16_t, NUM_REF_PIC_LIST_01> refIdx;
   MergeType mergeType;
-  Mv mvdAffi[NUM_REF_PIC_LIST_01][3];
+  MvdAffi mvdAffi;
   bool ciipFlag;
+
+  InterPredictionData() {}
+  InterPredictionData(const bool _mergeFlag, const bool _regularMergeFlag,
+                      const uint8_t _mergeIdx, const uint8_t _geoSplitDir,
+                      const uint8_t _geoMergeIdx0, const uint8_t _geoMergeIdx1,
+                      const bool _mmvdMergeFlag, const uint32_t _mmvdMergeIdx,
+                      const uint8_t _interDir, const uint8_t *_mvpIdx,
+                      const ::std::array<Mv, NUM_REF_PIC_LIST_01> &_mvd,
+                      const ::std::array<Mv, NUM_REF_PIC_LIST_01> &_mv,
+                      const int16_t *_refIdx, const MergeType _mergeType,
+                      const MvdAffi &_mvdAffi, const bool _ciipFlag)
+      : mergeFlag(_mergeFlag), regularMergeFlag(_regularMergeFlag),
+        mergeIdx(_mergeIdx), geoSplitDir(_geoSplitDir),
+        geoMergeIdx0(_geoMergeIdx0), geoMergeIdx1(_geoMergeIdx1),
+        mmvdMergeFlag(_mmvdMergeFlag), mmvdMergeIdx(_mmvdMergeIdx),
+        interDir(_interDir), mvd(_mvd), mv(_mv), mergeType(_mergeType),
+        mvdAffi(_mvdAffi), ciipFlag(_ciipFlag) {
+    copy_array(_mvpIdx, mvpIdx);
+    copy_array(_refIdx, refIdx);
+  }
 };
 
 struct PredictionUnit : public UnitArea,
@@ -393,6 +474,13 @@ struct PredictionUnit : public UnitArea,
   void initData();
   unsigned idx;
   PredictionUnit *next;
+
+  PredictionUnit() {}
+  PredictionUnit(const UnitArea &_unitArea, const IntraPredictionData &_intraPd,
+                 const InterPredictionData &_interPd, const ChannelType _chType,
+                 const unsigned _idx)
+      : UnitArea(_unitArea), IntraPredictionData(_intraPd),
+        InterPredictionData(_interPd), chType(_chType), idx(_idx) {}
 };
 
 // ---------------------------------------------------------------------------
@@ -405,10 +493,27 @@ struct TransformUnit : public UnitArea {
   ChannelType chType;
 
   uint8_t depth;
-  uint8_t mtsIdx[MAX_NUM_TBLOCKS];
+  ::std::array<uint8_t, MAX_NUM_TBLOCKS> mtsIdx;
   bool noResidual;
   uint8_t jointCbCr;
-  uint8_t cbf[MAX_NUM_TBLOCKS];
+  ::std::array<uint8_t, MAX_NUM_TBLOCKS> cbf;
+
+  TransformUnit() {}
+  TransformUnit(const UnitArea &_unitArea, const ChannelType _chType,
+                const uint8_t _depth, const uint8_t *_mtsIdx,
+                const bool _noResidual, const uint8_t _jointCbCr,
+                const uint8_t *_cbf, const unsigned _idx,
+                TCoeff *const coeffs[MAX_NUM_TBLOCKS],
+                Pel *const pcmbuf[MAX_NUM_TBLOCKS],
+                bool *const runType[MAX_NUM_TBLOCKS - 1])
+      : UnitArea(_unitArea), chType(_chType), depth(_depth),
+        noResidual(_noResidual), jointCbCr(_jointCbCr), idx(_idx) {
+    copy_array(_mtsIdx, mtsIdx);
+    copy_array(_cbf, cbf);
+    copy_array(coeffs, m_coeffs);
+    copy_array(pcmbuf, m_pcmbuf);
+    copy_array(runType, m_runType);
+  }
 
   void initData();
 
@@ -431,11 +536,22 @@ struct TransformUnit : public UnitArea {
   PLTescapeBuf getescapeValue(const ComponentID id);
   const CPLTescapeBuf getescapeValue(const ComponentID id) const;
 
+  const ::std::array<TCoeff *, MAX_NUM_TBLOCKS> getCoeffs() const {
+    return m_coeffs;
+  }
+  const ::std::array<Pel *, MAX_NUM_TBLOCKS> getPcmBuf() const {
+    return m_pcmbuf;
+  }
+  const ::std::array<bool *, MAX_NUM_TBLOCKS - 1> getRunType() const {
+    return m_runType;
+  }
+
 private:
-  TCoeff *m_coeffs[MAX_NUM_TBLOCKS];
-  Pel *m_pcmbuf[MAX_NUM_TBLOCKS];
-  bool *m_runType[MAX_NUM_TBLOCKS - 1];
+  ::std::array<TCoeff *, MAX_NUM_TBLOCKS> m_coeffs;
+  ::std::array<Pel *, MAX_NUM_TBLOCKS> m_pcmbuf;
+  ::std::array<bool *, MAX_NUM_TBLOCKS - 1> m_runType;
 };
+} // namespace EntropyCoding
 
 // ---------------------------------------------------------------------------
 // Utility class for easy for-each like unit traversing
@@ -443,6 +559,7 @@ private:
 
 #include <iterator>
 
+namespace EntropyCoding {
 template <typename T>
 class UnitIterator : public ::std::iterator<::std::forward_iterator_tag, T> {
 private:

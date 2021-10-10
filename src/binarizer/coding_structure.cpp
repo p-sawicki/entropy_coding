@@ -528,9 +528,8 @@ const int CodingStructure::signalModeCons(const PartSplit split,
 }
 
 void CodingStructure::reorderPrevPLT(
-    PLTBuf &prevPLT, uint8_t curPLTSize[MAX_NUM_CHANNEL_TYPE],
-    Pel curPLT[MAX_NUM_COMPONENT][MAXPLTSIZE],
-    bool reuseflag[MAX_NUM_CHANNEL_TYPE][MAXPLTPREDSIZE], uint32_t compBegin,
+    PLTBuf &prevPLT, ::std::array<uint8_t, MAX_NUM_CHANNEL_TYPE> &curPLTSize,
+    CurPLT31 &curPLT, ReuseFlag &reuseflag, uint32_t compBegin,
     uint32_t numComp, bool jointPLT) {
   Pel stuffedPLT[MAX_NUM_COMPONENT][MAXPLTPREDSIZE];
   uint8_t tempCurPLTsize[MAX_NUM_CHANNEL_TYPE];
@@ -543,7 +542,7 @@ void CodingStructure::reorderPrevPLT(
                                  : ((i > 0) ? COMPONENT_Cb : COMPONENT_Y);
     tempCurPLTsize[comID] = curPLTSize[comID];
     stuffPLTsize[i] = 0;
-    memcpy(stuffedPLT[i], curPLT[i], curPLTSize[comID] * sizeof(Pel));
+    memcpy(stuffedPLT[i], curPLT[i].data(), curPLTSize[comID] * sizeof(Pel));
   }
 
   for (int ch = compBegin; ch < (compBegin + numComp); ch++) {
@@ -575,7 +574,7 @@ void CodingStructure::reorderPrevPLT(
     ComponentID comID = jointPLT ? (ComponentID)compBegin
                                  : ((i > 0) ? COMPONENT_Cb : COMPONENT_Y);
     prevPLT.curPLTSize[comID] = curPLTSize[comID] + stuffPLTsize[comID];
-    memcpy(prevPLT.curPLT[i], stuffedPLT[i],
+    memcpy(prevPLT.curPLT[i].data(), stuffedPLT[i],
            prevPLT.curPLTSize[comID] * sizeof(Pel));
     CHECK(prevPLT.curPLTSize[comID] > maxPredPltSize,
           " Maximum palette predictor size exceed limit");

@@ -1,6 +1,4 @@
 #include "log.hpp"
 
-using namespace EntropyCoding;
-
-Logger binLogger("bin_log.txt");
-Logger bitLogger("bit_log.txt");
+EntropyCoding::Logger EntropyCoding::binLogger("bin_log.txt");
+EntropyCoding::Logger EntropyCoding::bitLogger("bit_log.txt");

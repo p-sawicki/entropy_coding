@@ -8,6 +8,7 @@
 #include "log.hpp"
 #include "sample_adaptive_offset.hpp"
 #include "unit_tools.hpp"
+#include "coding_structure.hpp"
 
 namespace EntropyCoding {
 
@@ -21,7 +22,7 @@ void CABACWriter::initCtxModels(const Slice &slice) {
     sliceType = encCABACTableIdx;
   }
   m_BinEncoder.reset(qp, (int)sliceType);
-  m_BinEncoder.setBaseLevel(slice.getRiceBaseLevel());
+  // m_BinEncoder.setBaseLevel(slice.getRiceBaseLevel());
 #if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
   m_BinEncoder.riceStatReset(
       slice.getSPS()->getBitDepth(CHANNEL_TYPE_LUMA),
@@ -2488,8 +2489,8 @@ void CABACWriter::residual_coding(const TransformUnit &tu, ComponentID compID,
   cctx.regBinLimit =
       (tu.getTbAreaAfterCoefZeroOut(compID) * ctxBinSampleRatio) >> 4;
 
-  int baseLevel = m_BinEncoder.getCtx().getBaseLevel();
-  cctx.setBaseLevel(baseLevel);
+  // int baseLevel = m_BinEncoder.getCtx().getBaseLevel();
+  // cctx.setBaseLevel(baseLevel);
   if (tu.cs->slice->getSPS()
           ->getSpsRangeExtension()
           .getPersistentRiceAdaptationEnabledFlag()) {
@@ -2668,22 +2669,22 @@ void CABACWriter::last_sig_coeff(CoeffCodingContext &cctx,
     zoTbHeight = (tu.blocks[compID].height == 32) ? 16 : zoTbHeight;
 #endif
   }
-#if JVET_W0046_RLSCP
-  if (isEncoding()) {
-    if ((posX + posY) > ((zoTbWdith + zoTbHeight + 2) / 2)) {
-      tu.cu->slice->updateCntRightBottom(1);
-    } else {
-      tu.cu->slice->updateCntRightBottom(-1);
-    }
-  }
-  if (tu.cu->slice->getReverseLastSigCoeffFlag()) {
-    posX = zoTbWdith - 1 - posX;
-    posY = zoTbHeight - 1 - posY;
+// #if JVET_W0046_RLSCP
+//   if (isEncoding()) {
+//     if ((posX + posY) > ((zoTbWdith + zoTbHeight + 2) / 2)) {
+//       tu.cu->slice->updateCntRightBottom(1);
+//     } else {
+//       tu.cu->slice->updateCntRightBottom(-1);
+//     }
+//   }
+//   if (tu.cu->slice->getReverseLastSigCoeffFlag()) {
+//     posX = zoTbWdith - 1 - posX;
+//     posY = zoTbHeight - 1 - posY;
 
-    GroupIdxX = g_groupIdx[posX];
-    GroupIdxY = g_groupIdx[posY];
-  }
-#endif
+//     GroupIdxX = g_groupIdx[posX];
+//     GroupIdxY = g_groupIdx[posY];
+//   }
+// #endif
 
   for (CtxLast = 0; CtxLast < GroupIdxX; CtxLast++) {
     binLogger.LogElements(SyntaxElement::last_sig_coeff_x_prefix, 1);
@@ -3115,7 +3116,7 @@ void CABACWriter::exp_golomb_eqprob(unsigned symbol, unsigned count) {
   m_BinEncoder.encodeBinsEP(symbol, count);
 }
 
-void CABACWriter::codeAlfCtuEnableFlags(CodingStructure &cs,
+void CABACWriter::codeAlfCtuEnableFlags(const CodingStructure &cs,
                                         ChannelType channel,
                                         AlfParam *alfParam) {
   if (isLuma(channel)) {
@@ -3131,7 +3132,7 @@ void CABACWriter::codeAlfCtuEnableFlags(CodingStructure &cs,
     }
   }
 }
-void CABACWriter::codeAlfCtuEnableFlags(CodingStructure &cs, ComponentID compID,
+void CABACWriter::codeAlfCtuEnableFlags(const CodingStructure &cs, ComponentID compID,
                                         AlfParam *alfParam) {
   uint32_t numCTUs = cs.pcv->sizeInCtus;
 
@@ -3140,7 +3141,7 @@ void CABACWriter::codeAlfCtuEnableFlags(CodingStructure &cs, ComponentID compID,
   }
 }
 
-void CABACWriter::codeAlfCtuEnableFlag(CodingStructure &cs, uint32_t ctuRsAddr,
+void CABACWriter::codeAlfCtuEnableFlag(const CodingStructure &cs, uint32_t ctuRsAddr,
                                        const int compIdx, AlfParam *alfParam) {
   const bool alfComponentEnabled =
       (alfParam != NULL) ? alfParam->enabledFlag[compIdx]
@@ -3176,7 +3177,7 @@ void CABACWriter::codeAlfCtuEnableFlag(CodingStructure &cs, uint32_t ctuRsAddr,
   }
 }
 
-void CABACWriter::codeCcAlfFilterControlIdc(uint8_t idcVal, CodingStructure &cs,
+void CABACWriter::codeCcAlfFilterControlIdc(uint8_t idcVal, const CodingStructure &cs,
                                             const ComponentID compID,
                                             const int curIdx,
                                             const uint8_t *filterControlIdc,
@@ -3272,7 +3273,7 @@ void CABACWriter::mip_pred_mode(const PredictionUnit &pu) {
   xWriteTruncBinCode(pu.intraDir[CHANNEL_TYPE_LUMA], numModes);
 }
 
-void CABACWriter::codeAlfCtuFilterIndex(CodingStructure &cs, uint32_t ctuRsAddr,
+void CABACWriter::codeAlfCtuFilterIndex(const CodingStructure &cs, uint32_t ctuRsAddr,
                                         bool alfEnableLuma) {
   if ((!cs.sps->getALFEnabledFlag()) || (!alfEnableLuma)) {
     return;
@@ -3317,7 +3318,7 @@ void CABACWriter::codeAlfCtuFilterIndex(CodingStructure &cs, uint32_t ctuRsAddr,
   }
 }
 
-void CABACWriter::codeAlfCtuAlternatives(CodingStructure &cs,
+void CABACWriter::codeAlfCtuAlternatives(const CodingStructure &cs,
                                          ChannelType channel,
                                          AlfParam *alfParam) {
   if (isChroma(channel)) {
@@ -3330,7 +3331,7 @@ void CABACWriter::codeAlfCtuAlternatives(CodingStructure &cs,
   }
 }
 
-void CABACWriter::codeAlfCtuAlternatives(CodingStructure &cs,
+void CABACWriter::codeAlfCtuAlternatives(const CodingStructure &cs,
                                          ComponentID compID,
                                          AlfParam *alfParam) {
   if (compID == COMPONENT_Y) {
@@ -3346,7 +3347,7 @@ void CABACWriter::codeAlfCtuAlternatives(CodingStructure &cs,
   }
 }
 
-void CABACWriter::codeAlfCtuAlternative(CodingStructure &cs, uint32_t ctuRsAddr,
+void CABACWriter::codeAlfCtuAlternative(const CodingStructure &cs, uint32_t ctuRsAddr,
                                         const int compIdx,
                                         const AlfParam *alfParam) {
   if (compIdx == COMPONENT_Y) {

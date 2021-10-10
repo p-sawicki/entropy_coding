@@ -1,10 +1,9 @@
 #include <algorithm>
 
 #include "cabac_reader.hpp"
-#include "coding_structure.hpp"
-#include "picture.hpp"
 #include "sample_adaptive_offset.hpp"
 #include "unit_tools.hpp"
+#include "coding_structure.hpp"
 
 namespace EntropyCoding {
 
@@ -47,7 +46,7 @@ void CABACReader::initCtxModels(Slice &slice) {
     }
   }
   m_BinDecoder.reset(qp, (int)sliceType);
-  m_BinDecoder.setBaseLevel(slice.getRiceBaseLevel());
+  // m_BinDecoder.setBaseLevel(slice.getRiceBaseLevel());
 #if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
   m_BinDecoder.riceStatReset(slice.getSPS()->getBitDepth(CHANNEL_TYPE_LUMA),
                              slice.getSPS()
@@ -2571,8 +2570,8 @@ void CABACReader::residual_coding(TransformUnit &tu, ComponentID compID,
   cctx.regBinLimit =
       (tu.getTbAreaAfterCoefZeroOut(compID) * ctxBinSampleRatio) >> 4;
 
-  int baseLevel = m_BinDecoder.getCtx().getBaseLevel();
-  cctx.setBaseLevel(baseLevel);
+  // int baseLevel = m_BinDecoder.getCtx().getBaseLevel();
+  // cctx.setBaseLevel(baseLevel);
   if (tu.cs->slice->getSPS()
           ->getSpsRangeExtension()
           .getPersistentRiceAdaptationEnabledFlag()) {
@@ -2781,12 +2780,12 @@ int CABACReader::last_sig_coeff(CoeffCodingContext &cctx, TransformUnit &tu,
     PosLastY = g_minInGroup[PosLastY] + temp;
   }
 
-#if JVET_W0046_RLSCP
-  if (tu.cu->slice->getReverseLastSigCoeffFlag()) {
-    PosLastX = zoTbWdith - 1 - PosLastX;
-    PosLastY = zoTbHeight - 1 - PosLastY;
-  }
-#endif
+// #if JVET_W0046_RLSCP
+//   if (tu.cu->slice->getReverseLastSigCoeffFlag()) {
+//     PosLastX = zoTbWdith - 1 - PosLastX;
+//     PosLastY = zoTbHeight - 1 - PosLastY;
+//   }
+// #endif
   int blkPos;
   blkPos = PosLastX + (PosLastY * cctx.width());
 
