@@ -2,6 +2,7 @@
 build
 lib
 bin
+orig
 log*.txt
 rec.yuv
 str.bin

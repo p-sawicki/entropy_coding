@@ -453,6 +453,8 @@ class MergeCtx {};
 
 class CUCtx {
 public:
+  CUCtx() {}
+
   CUCtx(int _qp)
       : isDQPCoded(false), isChromaQpAdjCoded(false), qgStart(false), qp(_qp) {
     violatesLfnstConstrained[CHANNEL_TYPE_LUMA] = false;
