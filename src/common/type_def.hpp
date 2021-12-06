@@ -246,6 +246,7 @@ enum MTSIdx {
 template <typename T> class dynamic_cache {
 public:
   std::vector<T *> m_cache;
+
   ~dynamic_cache() { deleteEntries(); }
 
   void deleteEntries() {

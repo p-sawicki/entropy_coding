@@ -5,6 +5,9 @@
 
 namespace EntropyCoding {
 
+void initROM();
+void destroyROM();
+
 struct ScanElement {
   uint32_t idx;
   uint16_t x;

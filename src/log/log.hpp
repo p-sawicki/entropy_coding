@@ -2,6 +2,7 @@
 #define ENTROPY_CODEC_LOG
 
 #include <fstream>
+#include <iostream>
 
 namespace EntropyCoding {
 
@@ -129,6 +130,7 @@ enum class SyntaxElement {
 
 class Logger {
   ::std::ofstream fs;
+  int n;
 
   template <typename... vals, typename val>
   void LogValues(val first, vals... rest) {
@@ -141,17 +143,19 @@ class Logger {
   }
 
 public:
-  Logger(const char *filename) : fs(filename) {}
+  Logger(const char *filename) : fs(filename), n(0) {}
 
 #ifdef ENABLE_LOGGING
   void LogElement(const SyntaxElement elem) {
-    fs << static_cast<int>(elem) << "\n";
+    fs << std::hex << static_cast<int>(elem) << "\n";
+    std::cout << n++ << "\n";
   }
 
   template <typename... vals>
   void LogElements(const SyntaxElement elem, vals... rest) {
-    fs << static_cast<int>(elem) << "\t";
+    fs << std::hex << static_cast<int>(elem) << "\t";
     LogValues(rest...);
+    std::cout << n++ << "\n";
   }
 
   void LogBits(const uint32_t bits) { fs << ::std::hex << bits; }

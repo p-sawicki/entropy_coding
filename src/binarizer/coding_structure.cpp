@@ -258,7 +258,7 @@ const CodingUnit *CodingStructure::getCURestricted(
 
 CodingUnit &CodingStructure::addCU(const UnitArea &unit,
                                    const ChannelType chType) {
-  CodingUnit *cu = m_cuCache.get();
+  CodingUnit *cu = m_cuCache->get();
 
   cu->UnitArea::operator=(unit);
   cu->initData();
@@ -336,7 +336,7 @@ CodingStructure::getPURestricted(const Position &pos,
 
 PredictionUnit &CodingStructure::addPU(const UnitArea &unit,
                                        const ChannelType chType) {
-  PredictionUnit *pu = m_puCache.get();
+  PredictionUnit *pu = m_puCache->get();
 
   pu->UnitArea::operator=(unit);
   pu->initData();
@@ -384,7 +384,7 @@ PredictionUnit &CodingStructure::addPU(const UnitArea &unit,
 
 TransformUnit &CodingStructure::addTU(const UnitArea &unit,
                                       const ChannelType chType) {
-  TransformUnit *tu = m_tuCache.get();
+  TransformUnit *tu = m_tuCache->get();
 
   tu->UnitArea::operator=(unit);
   tu->initData();

@@ -760,6 +760,24 @@ template <typename T1, typename T2, size_t N>
 inline T2* copy_array(const T1 *src, ::std::array<T2, N> &dest) {
   return ::std::copy(src, src + dest.size(), dest.begin());
 }
+
+class SizeIndexInfoLog2 : public SizeIndexInfo {
+public:
+  SizeIndexInfoLog2() {}
+  ~SizeIndexInfoLog2(){};
+
+  void init(SizeType maxSize) {
+    for (int i = 0, n = 0; i <= maxSize; i++) {
+      SizeType val = std::numeric_limits<SizeType>::max();
+      if (i == (1 << n)) {
+        n++;
+        val = i;
+      }
+      m_sizeToIdxTab.push_back(val);
+    }
+    SizeIndexInfo::xInit();
+  }
+};
 } // namespace EntropyCoding
 
 #endif // ENTROPY_CODEC_COMMON_DEF

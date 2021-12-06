@@ -60,9 +60,8 @@ public:
                   unsigned *const puIdx[MAX_NUM_CHANNEL_TYPE],
                   unsigned *const tuIdx[MAX_NUM_CHANNEL_TYPE],
                   const unsigned numCUs, const unsigned numPUs,
-                  const unsigned numTUs, const CUCache &cuCache,
-                  const PUCache &puCache, const TUCache &tuCache,
-                  TCoeff *const coeffs[MAX_NUM_COMPONENT],
+                  const unsigned numTUs, CUCache *cuCache, PUCache *puCache,
+                  TUCache *tuCache, TCoeff *const coeffs[MAX_NUM_COMPONENT],
                   Pel *const pcmbuf[MAX_NUM_COMPONENT],
                   bool *const runType[MAX_NUM_CHANNEL_TYPE], const int *offsets)
       : area(_area), picture(_picture), parent(_parent), slice(_slice),
@@ -110,6 +109,10 @@ public:
 
     ::std::for_each(tus.begin(), tus.end(),
                     [](TransformUnit *tu) { delete tu; });
+
+    delete m_cuCache;
+    delete m_puCache;
+    delete m_tuCache;
   }
 
   const CodingUnit *getCU(const Position &pos, const ChannelType _chType) const;
@@ -168,9 +171,9 @@ public:
   unsigned m_numPUs;
   unsigned m_numTUs;
 
-  CUCache m_cuCache;
-  PUCache m_puCache;
-  TUCache m_tuCache;
+  CUCache *m_cuCache;
+  PUCache *m_puCache;
+  TUCache *m_tuCache;
 
   ::std::array<TCoeff *, MAX_NUM_COMPONENT> m_coeffs;
   ::std::array<Pel *, MAX_NUM_COMPONENT> m_pcmbuf;
