@@ -35,59 +35,34 @@ class CodingStructure {
 public:
   UnitArea area;
 
-  Picture *picture;
-  CodingStructure *parent;
-  Slice *slice;
+  ::std::shared_ptr<Picture> picture;
+  ::std::shared_ptr<CodingStructure> parent;
+  ::std::shared_ptr<Slice> slice;
 
   ::std::array<UnitScale, MAX_NUM_COMPONENT> unitScale;
   int chromaQpAdj;
-  const SPS *sps;
-  const PPS *pps;
-  PicHeader *picHeader;
-  const PreCalcValues *pcv;
+  ::std::shared_ptr<const SPS> sps;
+  ::std::shared_ptr<const PPS> pps;
+  ::std::shared_ptr<PicHeader> picHeader;
+  ::std::shared_ptr<const PreCalcValues> pcv;
 
-  CodingStructure(const UnitArea &_area, Picture *_picture,
-                  CodingStructure *_parent, Slice *_slice,
+  CodingStructure(const UnitArea &_area,
                   const ::std::array<UnitScale, MAX_NUM_COMPONENT> &_unitScale,
-                  const int _chromaQpAdj, const SPS *_sps, const PPS *_pps,
-                  PicHeader *_picHeader, const PreCalcValues *_pcv,
+                  const int _chromaQpAdj,
                   const TreeType _treeType, const ModeType _modeType,
-                  const ::std::vector<CodingUnit *> &_cus,
-                  const ::std::vector<PredictionUnit *> &_pus,
-                  const ::std::vector<TransformUnit *> &_tus,
                   const PLTBuf &_prevPLT, bool isTuEnc,
                   unsigned *const cuIdx[MAX_NUM_CHANNEL_TYPE],
                   unsigned *const puIdx[MAX_NUM_CHANNEL_TYPE],
                   unsigned *const tuIdx[MAX_NUM_CHANNEL_TYPE],
                   const unsigned numCUs, const unsigned numPUs,
-                  const unsigned numTUs, CUCache *cuCache, PUCache *puCache,
-                  TUCache *tuCache, TCoeff *const coeffs[MAX_NUM_COMPONENT],
+                  const unsigned numTUs, TCoeff *const coeffs[MAX_NUM_COMPONENT],
                   Pel *const pcmbuf[MAX_NUM_COMPONENT],
                   bool *const runType[MAX_NUM_CHANNEL_TYPE], const int *offsets)
-      : area(_area), picture(_picture), parent(_parent), slice(_slice),
-        unitScale(_unitScale), chromaQpAdj(_chromaQpAdj), sps(_sps), pps(_pps),
-        picHeader(_picHeader), pcv(_pcv), treeType(_treeType),
-        modeType(_modeType), cus(_cus), pus(_pus), tus(_tus), prevPLT(_prevPLT),
+      : area(_area),
+        unitScale(_unitScale), chromaQpAdj(_chromaQpAdj), treeType(_treeType),
+        modeType(_modeType), prevPLT(_prevPLT),
         m_isTuEnc(isTuEnc), m_numCUs(numCUs), m_numPUs(numPUs),
-        m_numTUs(numTUs), m_cuCache(cuCache), m_puCache(puCache),
-        m_tuCache(tuCache) {
-    picture->cs = this;
-    slice->setPic(picture);
-    slice->setSPS(sps);
-    slice->setPPS(pps);
-    slice->setPicHeader(picHeader);
-
-    ::std::for_each(cus.begin(), cus.end(), [this](CodingUnit *cu) {
-      cu->cs = this;
-      cu->slice = slice;
-    });
-
-    ::std::for_each(pus.begin(), pus.end(),
-                    [this](PredictionUnit *pu) { pu->cs = this; });
-
-    ::std::for_each(tus.begin(), tus.end(),
-                    [this](TransformUnit *tu) { tu->cs = this; });
-
+        m_numTUs(numTUs) {
     copy_array(cuIdx, m_cuIdx);
     copy_array(puIdx, m_puIdx);
     copy_array(tuIdx, m_tuIdx);
@@ -96,23 +71,6 @@ public:
     copy_array(pcmbuf, m_pcmbuf);
     copy_array(runType, m_runType);
     copy_array(offsets, m_offsets);
-  }
-
-  ~CodingStructure() {
-    delete picture;
-    delete parent;
-
-    ::std::for_each(cus.begin(), cus.end(), [](CodingUnit *cu) { delete cu; });
-
-    ::std::for_each(pus.begin(), pus.end(),
-                    [](PredictionUnit *pu) { delete pu; });
-
-    ::std::for_each(tus.begin(), tus.end(),
-                    [](TransformUnit *tu) { delete tu; });
-
-    delete m_cuCache;
-    delete m_puCache;
-    delete m_tuCache;
   }
 
   const CodingUnit *getCU(const Position &pos, const ChannelType _chType) const;
@@ -150,9 +108,9 @@ public:
 
   const int signalModeCons(const PartSplit split, Partitioner &partitioner,
                            const ModeType modeTypeParent) const;
-  ::std::vector<CodingUnit *> cus;
-  ::std::vector<PredictionUnit *> pus;
-  ::std::vector<TransformUnit *> tus;
+  ::std::vector<::std::shared_ptr<CodingUnit>> cus;
+  ::std::vector<::std::shared_ptr<PredictionUnit>> pus;
+  ::std::vector<::std::shared_ptr<TransformUnit>> tus;
 
   PLTBuf prevPLT;
   void reorderPrevPLT(PLTBuf &prevPLT,
@@ -171,9 +129,9 @@ public:
   unsigned m_numPUs;
   unsigned m_numTUs;
 
-  CUCache *m_cuCache;
-  PUCache *m_puCache;
-  TUCache *m_tuCache;
+  ::std::shared_ptr<CUCache> m_cuCache;
+  ::std::shared_ptr<PUCache> m_puCache;
+  ::std::shared_ptr<TUCache> m_tuCache;
 
   ::std::array<TCoeff *, MAX_NUM_COMPONENT> m_coeffs;
   ::std::array<Pel *, MAX_NUM_COMPONENT> m_pcmbuf;

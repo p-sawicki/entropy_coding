@@ -101,7 +101,7 @@ public:
  * bytestream.
  */
 class InputBitstream {
-protected:
+public:
   ::std::vector<uint8_t> m_fifo; /// FIFO for storage of complete bytes
   ::std::vector<uint32_t> m_emulationPreventionByteLocation;
 

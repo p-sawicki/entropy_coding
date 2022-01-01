@@ -1804,7 +1804,7 @@ void CABACWriter::merge_data(const PredictionUnit &pu) {
 }
 
 void CABACWriter::imv_mode(const CodingUnit &cu) {
-  const SPS *sps = cu.cs->sps;
+  const SPS *sps = cu.cs->sps.get();
 
   if (!sps->getAMVREnabledFlag()) {
     return;

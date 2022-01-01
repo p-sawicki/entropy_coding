@@ -74,11 +74,11 @@ typedef static_vector<PartLevel, 2 * MAX_CU_DEPTH + 1> PartitioningStack;
 class Partitioner {
 protected:
   PartitioningStack m_partStack;
+
+public:
 #if _DEBUG
   UnitArea m_currArea;
 #endif
-
-public:
   unsigned currDepth;
   unsigned currQtDepth;
   unsigned currTrDepth;
@@ -94,11 +94,11 @@ public:
   ModeType modeType;
 
   Partitioner() {}
-  Partitioner(const PartitioningStack &partStack, const unsigned _currDepth,
-              const unsigned _currQtDepth, const unsigned _currTrDepth,
-              const unsigned _currBtDepth, const unsigned _currMtDepth,
-              const unsigned _currSubdiv, const Position &_currQgPos,
-              const Position &_currQgChromaPos,
+  Partitioner(const PartitioningStack &partStack,
+              const unsigned _currDepth, const unsigned _currQtDepth,
+              const unsigned _currTrDepth, const unsigned _currBtDepth,
+              const unsigned _currMtDepth, const unsigned _currSubdiv,
+              const Position &_currQgPos, const Position &_currQgChromaPos,
               const unsigned _currImplicitBtDepth, const ChannelType _chType,
               const TreeType _treeType, const ModeType _modeType)
       : m_partStack(partStack), currDepth(_currDepth),
@@ -149,12 +149,12 @@ public:
 class QTBTPartitioner : public Partitioner {
 public:
   QTBTPartitioner() : Partitioner() {}
-  
-  QTBTPartitioner(const PartitioningStack &partStack, const unsigned _currDepth,
-                  const unsigned _currQtDepth, const unsigned _currTrDepth,
-                  const unsigned _currBtDepth, const unsigned _currMtDepth,
-                  const unsigned _currSubdiv, const Position &_currQgPos,
-                  const Position &_currQgChromaPos,
+
+  QTBTPartitioner(const PartitioningStack &partStack,
+                  const unsigned _currDepth, const unsigned _currQtDepth,
+                  const unsigned _currTrDepth, const unsigned _currBtDepth,
+                  const unsigned _currMtDepth, const unsigned _currSubdiv,
+                  const Position &_currQgPos, const Position &_currQgChromaPos,
                   const unsigned _currImplicitBtDepth,
                   const ChannelType _chType, const TreeType _treeType,
                   const ModeType _modeType)
@@ -194,16 +194,14 @@ public:
     treeType = _initialState.treeType;
     modeType = _initialState.modeType;
   }
-  TUIntraSubPartitioner(const PartitioningStack &partStack,
-                        const unsigned _currDepth, const unsigned _currQtDepth,
-                        const unsigned _currTrDepth,
-                        const unsigned _currBtDepth,
-                        const unsigned _currMtDepth, const unsigned _currSubdiv,
-                        const Position &_currQgPos,
-                        const Position &_currQgChromaPos,
-                        const unsigned _currImplicitBtDepth,
-                        const ChannelType _chType, const TreeType _treeType,
-                        const ModeType _modeType)
+  TUIntraSubPartitioner(
+      const PartitioningStack &partStack,
+      const unsigned _currDepth, const unsigned _currQtDepth,
+      const unsigned _currTrDepth, const unsigned _currBtDepth,
+      const unsigned _currMtDepth, const unsigned _currSubdiv,
+      const Position &_currQgPos, const Position &_currQgChromaPos,
+      const unsigned _currImplicitBtDepth, const ChannelType _chType,
+      const TreeType _treeType, const ModeType _modeType)
       : Partitioner(partStack, _currDepth, _currQtDepth, _currTrDepth,
                     _currBtDepth, _currMtDepth, _currSubdiv, _currQgPos,
                     _currQgChromaPos, _currImplicitBtDepth, _chType, _treeType,

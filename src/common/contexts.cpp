@@ -1095,7 +1095,7 @@ Ctx::Ctx(const Ctx &ctx)
 
 const Ctx &Ctx::operator=(const Ctx &ctx) {
   m_BPMType = ctx.m_BPMType;
-  switch (m_BPMType) {
+  switch (ctx.m_BPMType) {
   case BPM_Std:
     m_CtxStore_Std.copyFrom(ctx.m_CtxStore_Std);
     break;
@@ -1117,6 +1117,17 @@ SubCtx Ctx::operator=(SubCtx &&subCtx) {
     break;
   }
   return std::move(subCtx);
+}
+
+void Ctx::init(const Ctx &ctx, const CtxSet &ctxSet) {
+  m_BPMType = ctx.m_BPMType;
+  switch (m_BPMType) {
+  case BPM_Std:
+    m_CtxStore_Std.copyFrom(ctx.m_CtxStore_Std, ctxSet);
+    break;
+  default:
+    break;
+  }
 }
 
 void Ctx::init(int qp, int initId) {

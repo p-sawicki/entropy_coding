@@ -148,14 +148,14 @@ public:
 #ifdef ENABLE_LOGGING
   void LogElement(const SyntaxElement elem) {
     fs << std::hex << static_cast<int>(elem) << "\n";
-    std::cout << n++ << "\n";
+    //std::cout << std::dec << n++ << " " << std::hex << static_cast<int>(elem) << "\n";
   }
 
   template <typename... vals>
   void LogElements(const SyntaxElement elem, vals... rest) {
     fs << std::hex << static_cast<int>(elem) << "\t";
     LogValues(rest...);
-    std::cout << n++ << "\n";
+    //std::cout << std::dec << n++ << " " << std::hex << static_cast<int>(elem) << "\n";
   }
 
   void LogBits(const uint32_t bits) { fs << ::std::hex << bits; }

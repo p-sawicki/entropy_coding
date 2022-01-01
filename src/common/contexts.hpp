@@ -256,6 +256,7 @@ public:
   SubCtx operator=(SubCtx &&subCtx);
 
   void init(int qp, int initId);
+  void init(const Ctx& ctx, const CtxSet &ctxSet);
 
 #if JVET_W0178_CONSTRAINTS_ON_REXT_TOOLS
   void riceStatReset(int bitDepth, bool persistentRiceAdaptationEnabledFlag);

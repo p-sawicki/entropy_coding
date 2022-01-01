@@ -25,7 +25,7 @@ CodingUnit *CodingStructure::getCU(const Position &pos,
                                                    unitScale[effChType])];
 
     if (idx != 0) {
-      return cus[idx - 1];
+      return cus[idx - 1].get();
     } else {
       return nullptr;
     }
@@ -53,7 +53,7 @@ const CodingUnit *CodingStructure::getCU(const Position &pos,
                                                    unitScale[effChType])];
 
     if (idx != 0) {
-      return cus[idx - 1];
+      return cus[idx - 1].get();
     } else {
       return nullptr;
     }
@@ -75,7 +75,7 @@ PredictionUnit *CodingStructure::getPU(const Position &pos,
                                                    unitScale[effChType])];
 
     if (idx != 0) {
-      return pus[idx - 1];
+      return pus[idx - 1].get();
     } else {
       return nullptr;
     }
@@ -97,7 +97,7 @@ CodingStructure::getPU(const Position &pos, const ChannelType effChType) const {
                                                    unitScale[effChType])];
 
     if (idx != 0) {
-      return pus[idx - 1];
+      return pus[idx - 1].get();
     } else {
       return nullptr;
     }
@@ -141,7 +141,7 @@ TransformUnit *CodingStructure::getTU(const Position &pos,
           }
         }
       }
-      return tus[idx - 1 + extraIdx];
+      return tus[idx - 1 + extraIdx].get();
     } else if (m_isTuEnc) {
       return parent->getTU(pos, effChType);
     } else {
@@ -185,7 +185,7 @@ const TransformUnit *CodingStructure::getTU(const Position &pos,
           }
         }
       }
-      return tus[idx - 1 + extraIdx];
+      return tus[idx - 1 + extraIdx].get();
     } else if (m_isTuEnc) {
       return parent->getTU(pos, effChType);
     } else {
@@ -203,7 +203,7 @@ CodingUnit *CodingStructure::getLumaCU(const Position &pos) {
                                                  unitScale[effChType])];
 
   if (idx != 0) {
-    return cus[idx - 1];
+    return cus[idx - 1].get();
   } else {
     return nullptr;
   }
@@ -273,13 +273,13 @@ CodingUnit &CodingStructure::addCU(const UnitArea &unit,
   cu->treeType = treeType;
   cu->modeType = modeType;
 
-  CodingUnit *prevCU = m_numCUs > 0 ? cus.back() : nullptr;
+  CodingUnit *prevCU = m_numCUs > 0 ? cus.back().get() : nullptr;
 
   if (prevCU) {
     prevCU->next = cu;
   }
 
-  cus.push_back(cu);
+  cus.push_back(::std::shared_ptr<CodingUnit>(cu));
 
   uint32_t idx = ++m_numCUs;
   cu->idx = idx;
@@ -342,16 +342,16 @@ PredictionUnit &CodingStructure::addPU(const UnitArea &unit,
   pu->initData();
   pu->next = nullptr;
   pu->cs = this;
-  pu->cu = m_isTuEnc ? cus[0] : getCU(unit.blocks[chType].pos(), chType);
+  pu->cu = m_isTuEnc ? cus[0].get() : getCU(unit.blocks[chType].pos(), chType);
   pu->chType = chType;
 
-  PredictionUnit *prevPU = m_numPUs > 0 ? pus.back() : nullptr;
+  PredictionUnit *prevPU = m_numPUs > 0 ? pus.back().get() : nullptr;
 
   if (prevPU && prevPU->cu == pu->cu) {
     prevPU->next = pu;
   }
 
-  pus.push_back(pu);
+  pus.push_back(::std::shared_ptr<PredictionUnit>(pu));
 
   if (pu->cu->firstPU == nullptr) {
     pu->cu->firstPU = pu;
@@ -391,17 +391,17 @@ TransformUnit &CodingStructure::addTU(const UnitArea &unit,
   tu->next = nullptr;
   tu->prev = nullptr;
   tu->cs = this;
-  tu->cu = m_isTuEnc ? cus[0] : getCU(unit.blocks[chType].pos(), chType);
+  tu->cu = m_isTuEnc ? cus[0].get() : getCU(unit.blocks[chType].pos(), chType);
   tu->chType = chType;
 
-  TransformUnit *prevTU = m_numTUs > 0 ? tus.back() : nullptr;
+  TransformUnit *prevTU = m_numTUs > 0 ? tus.back().get() : nullptr;
 
   if (prevTU && prevTU->cu == tu->cu) {
     prevTU->next = tu;
     tu->prev = prevTU;
   }
 
-  tus.push_back(tu);
+  tus.push_back(::std::shared_ptr<TransformUnit>(tu));
 
   if (tu->cu) {
     if (tu->cu->firstTU == nullptr) {

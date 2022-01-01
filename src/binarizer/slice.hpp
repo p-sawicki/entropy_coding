@@ -476,7 +476,8 @@ public:
         const SliceType encCABACTableIdx,
         const ::std::array<APS *, ALF_CTB_MAX_NUM_APS> &alfApss,
         const bool *alfEnabledFlag, const int numAlfApsIdsLuma,
-        const int alfApsIdChroma, const int tsrc_index, const unsigned *riceBit)
+        const int alfApsIdChroma, const int tsrc_index, const unsigned *riceBit,
+        const CcAlfFilterParam &ccAlfFilterParam, uint8_t* const *ccAlfFilterControl)
       : m_eSliceType(eSliceType), m_iSliceQp(iSliceQp),
         m_ChromaQpAdjEnabled(ChromaQpAdjEnabled),
         m_depQuantEnabledFlag(depQuantEnabledFlag),
@@ -488,7 +489,7 @@ public:
         m_weightPredTable(weightPredTable), m_cabacInitFlag(cabacInitFlag),
         m_encCABACTableIdx(encCABACTableIdx), m_alfApss(alfApss),
         m_numAlfApsIdsLuma(numAlfApsIdsLuma), m_alfApsIdChroma(alfApsIdChroma),
-        m_tsrc_index(tsrc_index) {
+        m_tsrc_index(tsrc_index), m_ccAlfFilterParam(ccAlfFilterParam) {
     ::std::copy(saoEnabledFlag, saoEnabledFlag + m_saoEnabledFlag.size(),
                 m_saoEnabledFlag.begin());
     ::std::copy(aiNumRefIdx, aiNumRefIdx + m_aiNumRefIdx.size(),
@@ -497,12 +498,10 @@ public:
     ::std::copy(alfEnabledFlag, alfEnabledFlag + m_alfEnabledFlag.size(),
                 m_alfEnabledFlag.begin());
     ::std::copy(riceBit, riceBit + m_riceBit.size(), m_riceBit.begin());
+    copy_array(ccAlfFilterControl, m_ccAlfFilterControl);
   }
 
   ~Slice() {
-    delete m_pcSPS;
-    delete m_pcPPS;
-    delete m_pcPicHeader;
     ::std::for_each(m_alfApss.begin(), m_alfApss.end(), [](APS *aps) {
       delete aps;
     });
@@ -572,7 +571,7 @@ public:
   int getAlfApsIdChroma() const { return m_alfApsIdChroma; }
 
   CcAlfFilterParam m_ccAlfFilterParam;
-  uint8_t *m_ccAlfFilterControl[2];
+  ::std::array<uint8_t *, 2> m_ccAlfFilterControl;
   int get_tsrc_index() const { return m_tsrc_index; }
   void setRiceBit(int idx, int i) { m_riceBit[idx] = i; }
   unsigned getRiceBit(int idx) const { return m_riceBit[idx]; }

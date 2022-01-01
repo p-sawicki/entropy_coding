@@ -757,8 +757,13 @@ inline size_t rsAddr(const Position &pos, const Position &origin,
 }
 
 template <typename T1, typename T2, size_t N>
-inline T2* copy_array(const T1 *src, ::std::array<T2, N> &dest) {
+inline T2 *copy_array(const T1 *src, ::std::array<T2, N> &dest) {
   return ::std::copy(src, src + dest.size(), dest.begin());
+}
+
+template <typename T1, typename T2, size_t N>
+inline T1 *copy_array(const ::std::array<T2, N> &src, T1 *dest) {
+  return ::std::copy(src.begin(), src.end(), dest);
 }
 
 class SizeIndexInfoLog2 : public SizeIndexInfo {

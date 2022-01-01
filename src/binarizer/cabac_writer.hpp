@@ -13,9 +13,9 @@ namespace EntropyCoding {
 
 class CABACWriter {
 public:
-  CABACWriter(BinEncIf &binEncoder) : m_BinEncoder(binEncoder), m_Bitstream(0) {
-    m_TestCtx = m_BinEncoder.getCtx();
-  }
+  CABACWriter(BinEncIf &binEncoder)
+      : m_BinEncoder(binEncoder), m_Bitstream(0),
+        m_TestCtx(m_BinEncoder.getCtx()) {}
   virtual ~CABACWriter() {}
 
 public:

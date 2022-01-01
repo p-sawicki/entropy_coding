@@ -2,6 +2,7 @@
 #define ENTROPY_CODEC_UNIT
 
 #include <assert.h>
+#include <memory>
 
 #include "buffer.hpp"
 #include "common_def.hpp"
