@@ -1,5 +1,5 @@
-#ifndef ENTROPY_CODEC_CONTEXTS
-#define ENTROPY_CODEC_CONTEXTS
+#ifndef COMMON_CONTEXTS
+#define COMMON_CONTEXTS
 
 #include <cstdint>
 #include <initializer_list>
@@ -7,7 +7,7 @@
 
 #include "common_def.hpp"
 
-namespace EntropyCoding {
+namespace Common {
 
 static constexpr int PROB_BITS =
     15; // Nominal number of bits to represent probabilities
@@ -296,6 +296,6 @@ protected:
   int m_baseLevel;
 #endif
 };
-} // namespace EntropyCoding
+} // namespace Common
 
-#endif // ENTROPY_CODEC_CONTEXTS
+#endif // COMMON_CONTEXTS

@@ -5,15 +5,16 @@
 #include <vector>
 
 #include "bit_stream.hpp"
+#include "log.hpp"
 
 using namespace std;
-namespace EntropyCoding {
+namespace Common {
 
 // ====================================================================================================================
 // Constructor / destructor / create / destroy
 // ====================================================================================================================
 
-OutputBitstream::OutputBitstream(::std::vector<uint8_t> &fifo) : m_fifo(fifo) { clear(); }
+OutputBitstream::OutputBitstream() { clear(); }
 
 OutputBitstream::~OutputBitstream() {}
 
@@ -97,6 +98,8 @@ void OutputBitstream::write(uint32_t uiBits, uint32_t uiNumberOfBits) {
   uint32_t topword = (uiNumberOfBits - next_num_held_bits) & ~((1 << 3) - 1);
   uint32_t write_bits =
       (m_held_bits << topword) | (uiBits >> next_num_held_bits);
+
+  bitLogger.LogBits(write_bits);
 
   switch (num_total_bits >> 3) {
   case 4:
@@ -424,4 +427,4 @@ uint32_t InputBitstream::readByteAlignment() {
   }
   return numBits + 1;
 }
-} // namespace EntropyCoding
+} // namespace Common

@@ -1,10 +1,10 @@
-#ifndef ENTROPY_CODEC_LOG
-#define ENTROPY_CODEC_LOG
+#ifndef COMMON_LOG
+#define COMMON_LOG
 
 #include <fstream>
 #include <iostream>
 
-namespace EntropyCoding {
+namespace Common {
 
 enum class SyntaxElement {
   end_of_slice_one_bit = 0x00,
@@ -129,8 +129,7 @@ enum class SyntaxElement {
 };
 
 class Logger {
-  ::std::ofstream fs;
-  int n;
+  std::ofstream fs;
 
   template <typename... vals, typename val>
   void LogValues(val first, vals... rest) {
@@ -143,22 +142,20 @@ class Logger {
   }
 
 public:
-  Logger(const char *filename) : fs(filename), n(0) {}
+  Logger(const char *filename) : fs(filename) {}
 
 #ifdef ENABLE_LOGGING
   void LogElement(const SyntaxElement elem) {
     fs << std::hex << static_cast<int>(elem) << "\n";
-    //std::cout << std::dec << n++ << " " << std::hex << static_cast<int>(elem) << "\n";
   }
 
   template <typename... vals>
   void LogElements(const SyntaxElement elem, vals... rest) {
     fs << std::hex << static_cast<int>(elem) << "\t";
     LogValues(rest...);
-    //std::cout << std::dec << n++ << " " << std::hex << static_cast<int>(elem) << "\n";
   }
 
-  void LogBits(const uint32_t bits) { fs << ::std::hex << bits; }
+  void LogBits(const uint32_t bits) { fs << std::hex << bits; }
 
 #else
   void LogElement(const SyntaxElement) {}
@@ -171,6 +168,6 @@ public:
 };
 
 extern Logger binLogger, bitLogger;
-} // namespace EntropyCoding
+} // namespace Common
 
-#endif // ENTROPY_CODEC_LOG
+#endif // COMMON_LOG

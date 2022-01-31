@@ -1,11 +1,11 @@
-#ifndef ENTROPY_CODEC_COMMON_DEF
-#define ENTROPY_CODEC_COMMON_DEF
+#ifndef COMMON_COMMON_DEF
+#define COMMON_COMMON_DEF
 
 #include <limits>
 
 #include "type_def.hpp"
 
-namespace EntropyCoding {
+namespace Common {
 
 static const int AFFINE_ME_LIST_SIZE = 4;
 static const int AFFINE_ME_LIST_SIZE_LD = 3;
@@ -783,6 +783,6 @@ public:
     SizeIndexInfo::xInit();
   }
 };
-} // namespace EntropyCoding
+} // namespace Common
 
-#endif // ENTROPY_CODEC_COMMON_DEF
+#endif // COMMON_COMMON_DEF

@@ -1,0 +1,63 @@
+Encode
+  akiyo_qcif.y4m
+    qp = 0
+      bin_log.txt e966511982d0936a9ca9883a35f517ce
+      str.bin     5a61b710458457aabf2e44e3131e088b
+    qp = 32
+      bin_log.txt e5d53e83f2b7aadf3022493e5538720c
+      str.bin     701e32c475d14ced3d87d56155ce6326
+    qp = 51
+      bin_log.txt ec240e3870d1573352e77b1e4cbd8456
+      str.bin     1d05000ad73270b7acf3ac69fdfcf11d
+  mother_daughter_qcif.y4m
+    qp = 0
+      bin_log.txt 6c8b606ee72da8d5da2770bb7bcd5e8e
+      str.bin     08ac3dbfb6567b3ee507c2f915648bb4
+    qp = 32
+      bin_log.txt cb07aa6057367e2147c466aa2de8c8a6
+      str.bin     e8bd7c96e6ca65d55ba03614468a7b31
+    qp = 51
+      bin_log.txt 87a68e22e0474c9e3fb317df9c4d0e54
+      str.bin     8ae78b0364c16c17e9bf8e06c2341be0
+  foreman_qcif.y4m
+    qp = 0
+      bin_log.txt 64f62fdbc3beb058a2f67c3e60005f36
+      str.bin     8c11258b22fb565e124edc393b4d786b
+    qp = 32
+      bin_log.txt 2030774c80eef75535520d007d6133fe
+      str.bin     4d9b27c3105dd72ca07ca1600ef32072
+    qp = 51
+      bin_log.txt b738547ffd20318533742c8129e07d78
+      str.bin     f6d7aa2946d77d36fa4eba1dca550a8b
+
+Decode
+  akiyo_qcif.y4m
+    qp = 0
+      bin_log.txt c081c2ee883fdc09deb98221fa457c3e
+      recon.yuv   f4e85576bfe9d5f9add099a634b7b3e6
+    qp = 32
+      bin_log.txt 527d76b47ce224680a528b7b85ac637a
+      recon.yuv   d02855846da02a1fad1f49d5ecce3a49
+    qp = 51
+      bin_log.txt c0803b5707712acf52976c64b336a5d9
+      recon.yuv   a0b9a7b9e415f6b1e60b9c9949d60763
+  mother_daughter_qcif.y4m
+    qp = 0
+      bin_log.txt 13675b49f48e0b507f5d4ee161e7bc84
+      recon.yuv   cb1fad9a6ca3bce75f57f31e9c73921d
+    qp = 32
+      bin_log.txt 8eafc6db6f212cee67fe95eda2ba746d
+      recon.yuv   f999dd3c573959b8011a281f18f47170
+    qp = 51
+      bin_log.txt 55f42d268fc72474557d81a5c8a0c811
+      recon.yuv   4247f7b7f0b9321153b9f80707c44b93
+  foreman_qcif.y4m
+    qp = 0
+      bin_log.txt 4399c57b8943d373171fcbe3237bf2e3
+      recon.yuv   7d75ebb1730909beb00fa8fa2237f6c8
+    qp = 32
+      bin_log.txt e598fef37767657c46fe704bb98f52c9
+      recon.yuv   72d4e806a3ff22948ee29037e964638b
+    qp = 51
+      bin_log.txt a93123cfcfa35f4afac8ef85b6590e3e
+      recon.yuv   49bade579717b9d9a864cbfa46097767

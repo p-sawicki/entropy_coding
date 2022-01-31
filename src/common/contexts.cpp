@@ -4,7 +4,7 @@
 
 #include "contexts.hpp"
 
-namespace EntropyCoding {
+namespace Common {
 
 CtxSet::CtxSet(uint16_t offset, uint16_t size) : Offset(offset), Size(size) {}
 
@@ -1228,4 +1228,4 @@ const FracBitsAccess &Ctx::getFracBitsAcess() const {
     THROW("BPMType out of range");
   }
 }
-} // namespace EntropyCoding
+} // namespace Common

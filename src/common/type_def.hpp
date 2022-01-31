@@ -1,12 +1,12 @@
-#ifndef ENTROPY_CODEC_TYPE_DEF
-#define ENTROPY_CODEC_TYPE_DEF
+#ifndef COMMON_TYPE_DEF
+#define COMMON_TYPE_DEF
 
 #include <sstream>
 #include <stdexcept>
 #include <vector>
 #include <array>
 
-namespace EntropyCoding {
+namespace Common {
 
 enum ComponentID {
   COMPONENT_Y = 0,
@@ -694,6 +694,6 @@ public:
   bool Cb;
   bool Cr;
 };
-} // namespace EntropyCoding
+} // namespace Common
 
-#endif // ENTROPY_CODEC_TYPE_DEF
+#endif // COMMON_TYPE_DEF

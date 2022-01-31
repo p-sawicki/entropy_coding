@@ -1,6 +1,7 @@
 #include "arith_codec.hpp"
 
-namespace EntropyCoding {
+using namespace EntropyCoding;
+using namespace Common;
 
 #define CNT_OFFSET 0
 
@@ -712,4 +713,3 @@ BinEncIf *TBitEstimator<BinProbModel>::getTestBinEncoder() const {
 template class TBinEncoder<BinProbModel_Std>;
 
 template class TBitEstimator<BinProbModel_Std>;
-} // namespace EntropyCoding

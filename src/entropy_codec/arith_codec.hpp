@@ -16,28 +16,28 @@ public:
 
   void setUse(bool useStore);
   bool inUse() const;
-  const ::std::vector<bool> &getBinVector(unsigned ctxId) const;
+  const std::vector<bool> &getBinVector(unsigned ctxId) const;
 
 private:
   void xCheckAlloc();
 
 private:
-  static const ::std::size_t m_maxNumBins = 100000;
+  static const std::size_t m_maxNumBins = 100000;
   bool m_inUse;
   bool m_allocated;
-  ::std::vector<::std::vector<bool>> m_binBuffer;
+  std::vector<std::vector<bool>> m_binBuffer;
 };
 
-class BinEncIf : public Ctx {
+class BinEncIf : public Common::Ctx {
 protected:
   template <class BinProbModel>
-  BinEncIf(const BinProbModel *dummy) : Ctx(dummy) {}
+  BinEncIf(const BinProbModel *dummy) : Common::Ctx(dummy) {}
 
 public:
   virtual ~BinEncIf() = default;
 
 public:
-  virtual void init(OutputBitstream *bitstream) = 0;
+  virtual void init(Common::OutputBitstream *bitstream) = 0;
   virtual void uninit() = 0;
   virtual void start() = 0;
   virtual void finish() = 0;
@@ -86,7 +86,7 @@ public:
   uint32_t getTrm() const;
 
 private:
-  ::std::vector<uint32_t> m_CtxBinsCodedBuffer;
+  std::vector<uint32_t> m_CtxBinsCodedBuffer;
   uint32_t *m_NumBinsCtx;
   uint32_t m_NumBinsEP;
   uint32_t m_NumBinsTrm;
@@ -100,7 +100,7 @@ public:
   ~BinEncoderBase() {}
 
 public:
-  void init(OutputBitstream *bitstream);
+  void init(Common::OutputBitstream *bitstream);
   void uninit();
   void start();
   void finish();
@@ -132,7 +132,7 @@ protected:
   void writeOut();
 
 protected:
-  OutputBitstream *m_Bitstream;
+  Common::OutputBitstream *m_Bitstream;
   uint32_t m_Low;
   uint32_t m_Range;
   uint32_t m_bufferedByte;
@@ -153,7 +153,7 @@ public:
   BinEncIf *getTestBinEncoder() const;
 
 private:
-  CtxStore<BinProbModel> &m_Ctx;
+  Common::CtxStore<BinProbModel> &m_Ctx;
 };
 
 class BitEstimatorBase : public BinEncIf {
@@ -164,7 +164,7 @@ public:
   ~BitEstimatorBase() = default;
 
 public:
-  void init(OutputBitstream *bitstream);
+  void init(Common::OutputBitstream *bitstream);
   void uninit();
   void start();
   void finish();
@@ -205,14 +205,14 @@ public:
   BinEncIf *getTestBinEncoder() const;
 
 private:
-  CtxStore<BinProbModel> &m_Ctx;
+  Common::CtxStore<BinProbModel> &m_Ctx;
 };
 
-typedef TBinEncoder<BinProbModel_Std> BinEncoder_Std;
+typedef TBinEncoder<Common::BinProbModel_Std> BinEncoder_Std;
 
-typedef TBitEstimator<BinProbModel_Std> BitEstimator_Std;
+typedef TBitEstimator<Common::BinProbModel_Std> BitEstimator_Std;
 
-class BinDecoderBase : public Ctx {
+class BinDecoderBase : public Common::Ctx {
 protected:
   template <class BinProbModel> BinDecoderBase(const BinProbModel *dummy);
 
@@ -220,7 +220,7 @@ public:
   ~BinDecoderBase() = default;
 
 public:
-  void init(InputBitstream *bitstream);
+  void init(Common::InputBitstream *bitstream);
   void uninit();
   void start();
   void finish();
@@ -250,7 +250,7 @@ private:
   unsigned decodeAlignedBinsEP(unsigned numBins);
 
 protected:
-  InputBitstream *m_Bitstream;
+  Common::InputBitstream *m_Bitstream;
   uint32_t m_Range;
   uint32_t m_Value;
   int32_t m_bitsNeeded;
@@ -266,10 +266,10 @@ public:
   unsigned decodeBin(unsigned ctxId);
 
 private:
-  CtxStore<BinProbModel> &m_Ctx;
+  Common::CtxStore<BinProbModel> &m_Ctx;
 };
 
-typedef TBinDecoder<BinProbModel_Std> BinDecoder_Std;
+typedef TBinDecoder<Common::BinProbModel_Std> BinDecoder_Std;
 } // namespace EntropyCoding
 
 #endif // ENTROPY_CODEC_ARITH_CODEC

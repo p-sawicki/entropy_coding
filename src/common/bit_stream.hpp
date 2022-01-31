@@ -1,5 +1,5 @@
-#ifndef ENTROPY_CODEC_BIT_STREAM
-#define ENTROPY_CODEC_BIT_STREAM
+#ifndef COMMON_BIT_STREAM
+#define COMMON_BIT_STREAM
 
 #include <stdint.h>
 #include <stdio.h>
@@ -7,7 +7,7 @@
 
 #include "common_def.hpp"
 
-namespace EntropyCoding {
+namespace Common {
 
 /**
  * Model of a writable bitstream that accumulates bits to produce a
@@ -21,14 +21,14 @@ class OutputBitstream {
    *  - &fifo.front() to get a pointer to the data array.
    *    NB, this pointer is only valid until the next push_back()/clear()
    */
-  ::std::vector<uint8_t> &m_fifo;
+public:
+  ::std::vector<uint8_t> m_fifo;
 
   uint32_t m_num_held_bits; /// number of bits not flushed to bytestream.
   uint8_t m_held_bits;      /// the bits held and not flushed to bytestream.
                             /// this value is always msb-aligned, bigendian.
-public:
   // create / destroy
-  OutputBitstream(::std::vector<uint8_t> &fifo);
+  OutputBitstream();
   ~OutputBitstream();
 
   // interface for encoding
@@ -166,6 +166,6 @@ public:
   const ::std::vector<uint8_t> &getFifo() const;
   ::std::vector<uint8_t> &getFifo();
 };
-} // namespace EntropyCoding
+} // namespace Common
 
-#endif // ENTROPY_CODEC_BIT_STREAM
+#endif // COMMON_BIT_STREAM
