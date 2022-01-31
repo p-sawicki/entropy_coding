@@ -1,6 +1,3 @@
-[submodule "googletest"]
-	path = googletest
-	url = https://github.com/google/googletest.git
 [submodule "VVCSoftware_VTM"]
 	path = VVCSoftware_VTM
 	url = https://github.com/p-sawicki/VVCSoftware_VTM
